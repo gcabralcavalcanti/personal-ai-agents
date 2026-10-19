@@ -13,6 +13,8 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
+      - name: Lint and format check
+        run: pip install ruff && ruff check . && ruff format --check .
       - name: Unit tests (no network, no API key, no Anki, no Todoist)
         run: python -m unittest discover -s tests -v
       - name: Eval regression gate (replays recorded answers, costs nothing)

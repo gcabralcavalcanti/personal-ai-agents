@@ -1,29 +1,38 @@
 """Planner -> validator -> writes, the trace, and the end-to-end demo (replayed answers, no key, no network)."""
+
 import io
 import json
-import os
 import tempfile
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
+from _path import EXAMPLES
 from fake_llm import make_llm
-from _path import EXAMPLES, ROOT
+
 from todoist_gate import planner
-from tracing.trace import Trace
 from tracing import view
+from tracing.trace import Trace
 
 BOARD = json.loads(Path(EXAMPLES, "demo_board.json").read_text(encoding="utf-8"))
-DAY11 = [{"content": "Deep work: thesis chapter 2", "start": "09:00", "duration_min": 120, "timebox": False},
-         {"content": "Download dataset", "start": "13:00", "duration_min": 20, "timebox": False},
-         {"content": "Run regression", "start": "14:00", "duration_min": 60, "timebox": False},
-         {"content": "Gym", "start": "18:00", "duration_min": 60, "timebox": False}]
-DAY12 = [{"content": "Study group prep", "start": "09:00", "duration_min": 60, "timebox": False},
-         {"content": "Weekly report", "start": "10:00", "duration_min": 90, "timebox": False},
-         {"content": "Send slides to study group", "start": "16:00", "duration_min": 30, "timebox": False}]
-GOOD = {"days": [{"date": "2026-03-11", "items": DAY11}, {"date": "2026-03-12", "items": DAY12}],
-        "reschedule_overdue": [{"content": "Pay library fine", "date": "2026-03-10"}],
-        "request_fulfilled": True, "open_question": "", "summary": "ok"}
+DAY11 = [
+    {"content": "Deep work: thesis chapter 2", "start": "09:00", "duration_min": 120, "timebox": False},
+    {"content": "Download dataset", "start": "13:00", "duration_min": 20, "timebox": False},
+    {"content": "Run regression", "start": "14:00", "duration_min": 60, "timebox": False},
+    {"content": "Gym", "start": "18:00", "duration_min": 60, "timebox": False},
+]
+DAY12 = [
+    {"content": "Study group prep", "start": "09:00", "duration_min": 60, "timebox": False},
+    {"content": "Weekly report", "start": "10:00", "duration_min": 90, "timebox": False},
+    {"content": "Send slides to study group", "start": "16:00", "duration_min": 30, "timebox": False},
+]
+GOOD = {
+    "days": [{"date": "2026-03-11", "items": DAY11}, {"date": "2026-03-12", "items": DAY12}],
+    "reschedule_overdue": [{"content": "Pay library fine", "date": "2026-03-10"}],
+    "request_fulfilled": True,
+    "open_question": "",
+    "summary": "ok",
+}
 
 
 class Planner(unittest.TestCase):
@@ -38,12 +47,12 @@ class Planner(unittest.TestCase):
         naive = {**GOOD, "days": [{"date": "2026-03-12", "items": DAY12}], "reschedule_overdue": []}
         res, text = planner.validate(BOARD, naive)
         self.assertFalse(res["ok"])
-        self.assertIn("COVERAGE", text)            # the report's origin day is missing
+        self.assertIn("COVERAGE", text)  # the report's origin day is missing
         self.assertIn("PAST_DIRTY", text)
 
     def test_a_rewritten_day_cannot_lose_a_task(self):
         lost = {**GOOD, "days": [{"date": "2026-03-11", "items": DAY11[:2]}, GOOD["days"][1]]}
-        res, text = planner.validate(BOARD, lost)
+        _res, text = planner.validate(BOARD, lost)
         self.assertIn('LOST_TASK: "Gym"', text)
 
     def test_unfulfilled_request_goes_to_the_human(self):
@@ -79,15 +88,15 @@ class Tracing(unittest.TestCase):
 
     def test_error_is_recorded_and_raised(self):
         tr = Trace("t", None, root=tempfile.mkdtemp())
-        with self.assertRaises(ValueError):
-            with tr.step("boom"):
-                raise ValueError("bad")
+        with self.assertRaises(ValueError), tr.step("boom"):
+            raise ValueError("bad")
         self.assertEqual(view.load(tr.path)[0]["status"], "error")
 
 
 class Demo(unittest.TestCase):
     def test_demo_runs_end_to_end_from_recordings(self):
         import demo
+
         out = io.StringIO()
         with redirect_stdout(out):
             code = demo.main(["--yes"])

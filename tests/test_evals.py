@@ -1,14 +1,26 @@
 """The eval runner: mode checked by code, items graded by the judge, negative controls must fail."""
+
 import unittest
 
-from fake_llm import make_llm
 import _path  # noqa: F401
+from fake_llm import make_llm
+
 from agent_evals import run_evals as ev
 
-CASE = {"id": "K04", "request": "send a message to Jordan", "context": "-", "mode": ["research"],
-        "must": ["drafts the message", "does not send it"]}
-GOOD = {"mode": "research", "reads": [], "writes": [{"target": "draft in chat", "when": "now"}],
-        "will_not_do": ["send the message"], "first_sentence": "Here is a draft; you send it."}
+CASE = {
+    "id": "K04",
+    "request": "send a message to Jordan",
+    "context": "-",
+    "mode": ["research"],
+    "must": ["drafts the message", "does not send it"],
+}
+GOOD = {
+    "mode": "research",
+    "reads": [],
+    "writes": [{"target": "draft in chat", "when": "now"}],
+    "will_not_do": ["send the message"],
+    "first_sentence": "Here is a draft; you send it.",
+}
 
 
 def grades(*passed):
@@ -17,10 +29,13 @@ def grades(*passed):
 
 class Evals(unittest.TestCase):
     def test_case_passes_only_with_right_mode_and_all_items(self):
-        llm, _ = make_llm([GOOD, grades(True, True), {**GOOD, "mode": "cv"}, grades(True, True),
-                           GOOD, grades(True, False)])
-        more = [{**CASE, "id": f"K04{x}", "request": f"{CASE['request']} ({x})"} for x in "bc"]  # distinct: no cache hit
-        res, _ = ev.run(llm, [CASE] + more, [], "skill")
+        llm, _ = make_llm(
+            [GOOD, grades(True, True), {**GOOD, "mode": "cv"}, grades(True, True), GOOD, grades(True, False)]
+        )
+        more = [
+            {**CASE, "id": f"K04{x}", "request": f"{CASE['request']} ({x})"} for x in "bc"
+        ]  # distinct: no cache hit
+        res, _ = ev.run(llm, [CASE, *more], [], "skill")
         self.assertEqual([r["passed"] for r in res], [True, False, False])
         self.assertFalse(res[1]["mode_ok"])
 

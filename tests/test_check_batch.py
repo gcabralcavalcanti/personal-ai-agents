@@ -1,4 +1,5 @@
 """Golden cases for the batch validator: each one reproduces a class of real planning error (fictitious data)."""
+
 import copy
 import json
 import os
@@ -8,6 +9,7 @@ import tempfile
 import unittest
 
 from _path import EXAMPLES, SRC
+
 from todoist_gate.check_batch import check_batch
 
 with open(os.path.join(EXAMPLES, "batch_ok.json"), encoding="utf-8") as _f:
@@ -50,8 +52,9 @@ class CheckBatch(unittest.TestCase):
 
     def test_past_start_today(self):
         b = copy.deepcopy(OK)
-        b["days"].insert(0, {"date": "2026-03-10",
-                             "items": [{"content": "Review notes", "start": "07:00", "duration_min": 30}]})
+        b["days"].insert(
+            0, {"date": "2026-03-10", "items": [{"content": "Review notes", "start": "07:00", "duration_min": 30}]}
+        )
         self.assertIn("PAST", codes(check_batch(b)))
 
     def test_day_in_past(self):
@@ -73,15 +76,23 @@ class CheckBatch(unittest.TestCase):
 
     def test_cli_closed_batch_opens_gate(self):
         d = tempfile.mkdtemp()
-        p = subprocess.run([sys.executable, CLI, os.path.join(EXAMPLES, "batch_ok.json")],
-                           capture_output=True, text=True, env=dict(os.environ, GATE_FLAGS_DIR=d))
+        p = subprocess.run(
+            [sys.executable, CLI, os.path.join(EXAMPLES, "batch_ok.json")],
+            capture_output=True,
+            text=True,
+            env=dict(os.environ, GATE_FLAGS_DIR=d),
+        )
         self.assertEqual(p.returncode, 0)
         self.assertTrue(os.path.exists(os.path.join(d, "GATE-OK")))
 
     def test_cli_open_batch_keeps_gate_closed(self):
         d = tempfile.mkdtemp()
-        p = subprocess.run([sys.executable, CLI, os.path.join(EXAMPLES, "batch_blocked.json")],
-                           capture_output=True, text=True, env=dict(os.environ, GATE_FLAGS_DIR=d))
+        p = subprocess.run(
+            [sys.executable, CLI, os.path.join(EXAMPLES, "batch_blocked.json")],
+            capture_output=True,
+            text=True,
+            env=dict(os.environ, GATE_FLAGS_DIR=d),
+        )
         self.assertEqual(p.returncode, 2)
         self.assertFalse(os.path.exists(os.path.join(d, "GATE-OK")))
 

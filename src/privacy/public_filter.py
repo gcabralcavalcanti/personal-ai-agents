@@ -15,17 +15,22 @@ fictitious examples of the same shape.
 
 Usage:  python src/privacy/public_filter.py <rendered.html>      (exit 1 = forbidden term found)
 """
+
 import re
 import sys
 import unicodedata
 
-PUBLIC_IDS = ["H01", "H02", "H07"]          # fictitious: e.g. "read 20 pages", "study block", "language practice"
+PUBLIC_IDS = ["H01", "H02", "H07"]  # fictitious: e.g. "read 20 pages", "study block", "language practice"
 REFUSED_CATEGORIES = {"health", "private"}  # refused even if someone adds the ID above
 
-FORBIDDEN = [                                # fictitious examples; matched on lowercase text without accents
-    r"\bdiagnos", r"\bmedica", r"\bsalary\b", r"\bdebt\b", r"\bbank\b",
-    r"@\w+\.(com|br)\b",                     # any e-mail address
-    r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b",        # Brazilian CPF pattern
+FORBIDDEN = [  # fictitious examples; matched on lowercase text without accents
+    r"\bdiagnos",
+    r"\bmedica",
+    r"\bsalary\b",
+    r"\bdebt\b",
+    r"\bbank\b",
+    r"@\w+\.(com|br)\b",  # any e-mail address
+    r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b",  # Brazilian CPF pattern
 ]
 
 
@@ -46,7 +51,7 @@ def findings(text):
     for p in FORBIDDEN:
         m = re.search(p, t)
         if m:
-            out.append((p, t[max(0, m.start() - 30):m.end() + 30].replace("\n", " ")))
+            out.append((p, t[max(0, m.start() - 30) : m.end() + 30].replace("\n", " ")))
     return out
 
 

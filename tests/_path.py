@@ -1,4 +1,5 @@
 """Puts src/ on sys.path so tests run with plain `python -m unittest discover -s tests`."""
+
 import os
 import sys
 

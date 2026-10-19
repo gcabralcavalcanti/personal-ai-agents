@@ -93,16 +93,16 @@ reschedule-tasks: exit 0, add-tasks: exit 0
 === Trace =====================================================================
 Stage                               Status    ms       Calls  Replay  Tok in   Tok out  US$ now    US$ rec.   Detail                                        
 ----------------------------------  --------  -------  -----  ------  -------  -------  ---------  ---------  ----------------------------------------------
-hook: write before any batch        blocked   51       0      0       0        0        0.00000    0.00000    BLOCKED (gate): create or reschedule only aft…
-planner (Claude API) round=1        ok        0        0      1       1255     576      0.00000    0.00041    scope=day; 1 day(s)                           
+hook: write before any batch        blocked   55       0      0       0        0        0.00000    0.00000    BLOCKED (gate): create or reschedule only aft…
+planner (Claude API) round=1        ok        1        0      1       1255     576      0.00000    0.00041    scope=day; 1 day(s)                           
 validator (check_batch) round=1     blocked   0        0      0       0        0        0.00000    0.00000    6 problem(s)                                  
 planner (Claude API) round=2        ok        0        0      1       1781     1450     0.00000    0.00090    scope=full; 3 day(s)                          
 validator (check_batch) round=2     ok        0        0      0       0        0        0.00000    0.00000    batch closed                                  
 human approval                      ok        0        0      0       0        0        0.00000    0.00000    approved                                      
-hook: write with a closed batch     ok        106      0      0       0        0        0.00000    0.00000    reschedule-tasks: exit 0, add-tasks: exit 0   
+hook: write with a closed batch     ok        105      0      0       0        0        0.00000    0.00000    reschedule-tasks: exit 0, add-tasks: exit 0   
 write (fake Todoist)                ok        0        0      0       0        0        0.00000    0.00000    3 task(s) written                             
 ----------------------------------  --------  -------  -----  ------  -------  -------  ---------  ---------  ----------------------------------------------
-run                                 ok        164      0      2       3036     2026     0.00000    0.00132    8 steps                                       
+run                                 ok        166      0      2       3036     2026     0.00000    0.00132    8 steps                                       
 
 0 API call(s) now (US$ 0.00000); 2 recorded answer(s) replayed (they cost US$ 0.00132 when recorded).
-Trace: runs/demo-20261019-184110/trace.jsonl - HTML view: python src/tracing/view.py --last --html trace.html
+Trace: runs/demo-20261019-184947/trace.jsonl - HTML view: python src/tracing/view.py --last --html trace.html

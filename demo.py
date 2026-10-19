@@ -1,18 +1,12 @@
 #!/usr/bin/env python3
-"""demo.py - one request, end to end: planner (Claude API) -> validator -> gate hook -> write -> trace.
+"""One request on a fictitious task board: planner (Claude API) -> validator -> approval -> gate hook -> write.
 
-    python demo.py            # no API key needed: the model's answers were recorded on a live run
-    python demo.py --live     # call the API for any answer not recorded yet (needs ANTHROPIC_API_KEY)
+    python demo.py           # replays recorded model answers, no API key needed
+    python demo.py --live    # calls the API for answers not recorded yet
 
-What you will see, on a fictitious task board:
-  1. The model tries to write straight away. The PreToolUse hook blocks it: no validated batch.
-  2. Planner, round 1, sees only the day the request names (how the original failure happened).
-     The validator rejects the batch: a forgotten day, an overdue task, a lost task.
-  3. Planner, round 2, gets the whole board and the validator's report. The batch closes; the gate opens.
-  4. The human approves; the same hook now lets the exact tool calls through; a fake Todoist applies them.
-  5. Every stage is written to runs/<run>/trace.jsonl and shown as a table.
-Nothing here touches a real Todoist account.
+Every stage is written to runs/<run>/trace.jsonl. Nothing touches a real Todoist account.
 """
+
 from __future__ import annotations
 
 import json
@@ -24,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 FLAGS = tempfile.mkdtemp(prefix="gate-flags-")
-os.environ["GATE_FLAGS_DIR"] = FLAGS                     # before importing the gate modules
+os.environ["GATE_FLAGS_DIR"] = FLAGS  # before importing the gate modules
 sys.path.insert(0, str(ROOT / "src"))
 
 from llm.client import LLM  # noqa: E402
@@ -44,8 +38,13 @@ def say(title: str, body: str = "") -> None:
 
 def hook(call: dict) -> tuple[int, str]:
     """Run the hook exactly as Claude Code does: tool call as JSON on stdin; exit 2 = blocked."""
-    p = subprocess.run([sys.executable, str(HOOK)], input=json.dumps(call), capture_output=True, text=True,
-                       env=dict(os.environ, GATE_FLAGS_DIR=FLAGS))
+    p = subprocess.run(
+        [sys.executable, str(HOOK)],
+        input=json.dumps(call),
+        capture_output=True,
+        text=True,
+        env=dict(os.environ, GATE_FLAGS_DIR=FLAGS),
+    )
     return p.returncode, p.stderr.strip()
 
 
@@ -67,12 +66,17 @@ def main(argv=None) -> int:
     llm = LLM(mode="auto" if "--live" in argv else "demo", max_calls=8)
     tr = Trace("demo", llm)
 
-    say("Request", f'"{board["request"]}"\n(fictitious board: {board["today"]}, now {board["now"]}; '
-                   f'model {llm.summary()["model"]}, mode {llm.mode})')
+    say(
+        "Request",
+        f'"{board["request"]}"\n(fictitious board: {board["today"]}, now {board["now"]}; '
+        f"model {llm.summary()['model']}, mode {llm.mode})",
+    )
 
     with tr.step("hook: write before any batch") as s:
-        first_try = {"tool_name": "mcp__todoist__reschedule-tasks",
-                     "tool_input": {"tasks": [{"id": "t2", "dueString": "Mar 12 at 09:00"}]}}
+        first_try = {
+            "tool_name": "mcp__todoist__reschedule-tasks",
+            "tool_input": {"tasks": [{"id": "t2", "dueString": "Mar 12 at 09:00"}]},
+        }
         code, msg = hook(first_try)
         s["status"], s["detail"] = ("blocked", msg[:120]) if code == 2 else ("ok", "passed")
     say("1. The model tries to reschedule right away", f"hook exit {code}: {msg}")
@@ -82,8 +86,11 @@ def main(argv=None) -> int:
         with tr.step("planner (Claude API)", round=rnd) as s:
             proposal = planner.propose(llm, board, scope, feedback)
             s["detail"] = f"scope={scope}; {len(proposal['days'])} day(s)"
-        say(f"{rnd + 1}. Planner, round {rnd} (sees {'only the requested day' if scope == 'day' else 'the whole board'})",
-            show_proposal(proposal))
+        say(
+            f"{rnd + 1}. Planner, round {rnd} "
+            f"(sees {'only the requested day' if scope == 'day' else 'the whole board'})",
+            show_proposal(proposal),
+        )
         with tr.step("validator (check_batch)", round=rnd) as s:
             res, text = planner.validate(board, proposal)
             n = sum(len(d["errors"]) for d in res["days"]) + len(res["blockers"]) + len(res["decisions"])
@@ -98,7 +105,7 @@ def main(argv=None) -> int:
         tr.close(outcome="open")
         return 1
 
-    check_batch.FLAGS = FLAGS                            # the run's own flag folder, never the repo's
+    check_batch.FLAGS = FLAGS  # the run's own flag folder, never the repo's
     check_batch.open_gate()
     calls = planner.writes(board, closed)
     with tr.step("human approval") as s:
@@ -115,7 +122,8 @@ def main(argv=None) -> int:
 
     with tr.step("hook: write with a closed batch") as s:
         results = [hook(c) for c in calls]
-        s["detail"] = ", ".join(f"{c['tool_name'].split('__')[-1]}: exit {r[0]}" for c, r in zip(calls, results))
+        pairs = zip(calls, results, strict=True)
+        s["detail"] = ", ".join(f"{c['tool_name'].split('__')[-1]}: exit {r[0]}" for c, r in pairs)
         s["status"] = "ok" if all(r[0] == 0 for r in results) else "blocked"
     say("The same hook, now with the batch closed", s["detail"])
     if s["status"] != "ok":
@@ -123,15 +131,17 @@ def main(argv=None) -> int:
         return 1
 
     with tr.step("write (fake Todoist)") as s:
-        n = sum(len(c["tool_input"]["tasks"]) for c, r in zip(calls, results) if r[0] == 0)
+        n = sum(len(c["tool_input"]["tasks"]) for c, r in zip(calls, results, strict=False) if r[0] == 0)
         s["detail"] = f"{n} task(s) written"
     print(f"{n} task(s) written to the fake board.")
 
     total = tr.close(outcome="written")
-    say("Trace", table([json.loads(l) for l in tr.path.read_text(encoding="utf-8").splitlines()]))
-    print(f"\n{total['api_calls']} API call(s) now (US$ {total['cost_usd']:.5f}); {total['recorded_answers']} recorded "
-          f"answer(s) replayed (they cost US$ {total['recorded_cost_usd']:.5f} when recorded).\n"
-          f"Trace: runs/{tr.run_id}/trace.jsonl - HTML view: python src/tracing/view.py --last --html trace.html")
+    say("Trace", table([json.loads(line) for line in tr.path.read_text(encoding="utf-8").splitlines()]))
+    print(
+        f"\n{total['api_calls']} API call(s) now (US$ {total['cost_usd']:.5f}); {total['recorded_answers']} recorded "
+        f"answer(s) replayed (they cost US$ {total['recorded_cost_usd']:.5f} when recorded).\n"
+        f"Trace: runs/{tr.run_id}/trace.jsonl - HTML view: python src/tracing/view.py --last --html trace.html"
+    )
     return 0
 
 

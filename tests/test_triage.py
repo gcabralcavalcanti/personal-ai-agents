@@ -1,21 +1,37 @@
 """Job triage over the delta: code pre-filter, business-rule checks on the model's answer, idempotency, cap."""
-import json
+
 import unittest
 
-from fake_llm import make_llm
 import _path  # noqa: F401
+from fake_llm import make_llm
+
 from career import triage as tr
 
 PROFILE = {"candidate": "test", "graduation_windows": ["2027-12"], "geography": {"preferred": ["Rio de Janeiro"]}}
 URL = "https://boards.greenhouse.io/examplebank"
-STATE = {URL: {"company": "Example Bank (fictitious)", "area": "Banking",
-               "items": ["Investment Banking Intern - Rio de Janeiro", "Senior Engineer - Remote",
-                         "Analista Pleno de Credito - Sao Paulo", "Summer Analyst - Recife"]}}
+STATE = {
+    URL: {
+        "company": "Example Bank (fictitious)",
+        "area": "Banking",
+        "items": [
+            "Investment Banking Intern - Rio de Janeiro",
+            "Senior Engineer - Remote",
+            "Analista Pleno de Credito - Sao Paulo",
+            "Summer Analyst - Recife",
+        ],
+    }
+}
 
 
 def verdict(decision="monitor", geography="preferred", grad="unknown"):
-    return {"decision": decision, "graduation_fit": grad, "location": "x", "geography": geography,
-            "prep_cost": "medium", "reason": "test"}
+    return {
+        "decision": decision,
+        "graduation_fit": grad,
+        "location": "x",
+        "geography": geography,
+        "prep_cost": "medium",
+        "reason": "test",
+    }
 
 
 class Triage(unittest.TestCase):
@@ -32,8 +48,9 @@ class Triage(unittest.TestCase):
         self.assertEqual(tr.check(verdict("apply")), [])
 
     def test_bad_answer_is_retried_then_accepted(self):
-        llm, _ = make_llm([verdict("apply", geography="outside"), verdict("discard", geography="outside"),
-                           verdict("apply")])
+        llm, _ = make_llm(
+            [verdict("apply", geography="outside"), verdict("discard", geography="outside"), verdict("apply")]
+        )
         store = {}
         counts = tr.triage(STATE, store, PROFILE, llm, "2026-03-01", max_calls=10)
         self.assertEqual(counts["by_code"], 2)

@@ -19,6 +19,8 @@ leave the door open.
 
 Flag directory: $GATE_FLAGS_DIR, or <repo>/.flags by default (kept out of git).
 """
+
+import contextlib
 import json
 import os
 import re
@@ -39,17 +41,18 @@ def flag(name):
         return False
     if time.time() - os.path.getmtime(p) <= VALIDITY_S:
         return True
-    try:
+    with contextlib.suppress(OSError):
         os.remove(p)
-    except OSError:
-        pass
     expired.append(name)
     return False
 
 
 def note():
-    return (f" (Flag {expired[0]} was older than 15 minutes and was deleted: recreate it only if the human "
-            "approved again.)" if expired else "")
+    return (
+        f" (Flag {expired[0]} was older than 15 minutes and was deleted: recreate it only if the human approved again.)"
+        if expired
+        else ""
+    )
 
 
 def has_due(obj):
@@ -66,25 +69,32 @@ TIME_OF_DAY = re.compile(r"\d{1,2}(:\d{2}|h\d{0,2}\b|\s?(am|pm)\b)", re.I)
 def without_time(inp):
     """add-tasks where no task has a time of day: it does not occupy the calendar, so no clash is possible."""
     tasks = inp.get("tasks") if isinstance(inp, dict) else None
-    return bool(tasks) and all(not TIME_OF_DAY.search(str(t.get("dueString") or ""))
-                               for t in tasks if isinstance(t, dict))
+    return bool(tasks) and all(
+        not TIME_OF_DAY.search(str(t.get("dueString") or "")) for t in tasks if isinstance(t, dict)
+    )
 
 
 def decide(name, inp):
     """Return (exit_code, message)."""
     if re.search(r"update-tasks", name) and has_due(inp) and not flag("I7-OK"):
-        return 2, ("BLOCKED (R2): change dates with reschedule-tasks, never update-tasks with dueString "
-                   "(it rewrites the rule and kills the recurrence). If the human approved a schedule change, "
-                   f"run {RELEASE} I7, retry, then {RELEASE} --close." + note())
+        return 2, (
+            "BLOCKED (R2): change dates with reschedule-tasks, never update-tasks with dueString "
+            "(it rewrites the rule and kills the recurrence). If the human approved a schedule change, "
+            f"run {RELEASE} I7, retry, then {RELEASE} --close." + note()
+        )
     if re.search(r"add-tasks", name) and without_time(inp):
         pass  # untimed tasks skip the batch check; reschedule-tasks is still gated
     elif re.search(r"add-tasks|reschedule-tasks", name) and not flag("GATE-OK"):
-        return 2, ("BLOCKED (gate): create or reschedule only after the batch passed the checker in the last "
-                   "15 min. Run python src/todoist_gate/check_batch.py <batch.json>; a CLOSED batch opens "
-                   "the gate for 15 min." + note())
+        return 2, (
+            "BLOCKED (gate): create or reschedule only after the batch passed the checker in the last "
+            "15 min. Run python src/todoist_gate/check_batch.py <batch.json>; a CLOSED batch opens "
+            "the gate for 15 min." + note()
+        )
     if re.search(r"delete-object|uncomplete-tasks", name) and not flag("DELETE-OK"):
-        return 2, ("BLOCKED (R36): delete-object and uncomplete-tasks only on a direct, specific request from "
-                   f"the human. If asked, run {RELEASE} DELETE, retry, then {RELEASE} --close." + note())
+        return 2, (
+            "BLOCKED (R36): delete-object and uncomplete-tasks only on a direct, specific request from "
+            f"the human. If asked, run {RELEASE} DELETE, retry, then {RELEASE} --close." + note()
+        )
     return 0, ""
 
 

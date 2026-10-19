@@ -1,12 +1,13 @@
 """The API wrapper: schema, semantic check, retries, backoff, cache, call cap, demo mode, log. No network."""
+
 import json
 import unittest
 
+import _path  # noqa: F401
 import anthropic
 import httpx2
-
 from fake_llm import make_llm
-import _path  # noqa: F401
+
 from llm import client as client_mod
 from llm.client import LLM, BudgetExceeded, NoRecording
 
@@ -51,7 +52,7 @@ class LLMClient(unittest.TestCase):
         llm.sleep = delays.append
         self.assertEqual(llm.ask("t", "sys", "p", SCHEMA), {"x": 5})
         self.assertEqual(len(delays), 2)
-        self.assertGreater(delays[1], delays[0])          # exponential
+        self.assertGreater(delays[1], delays[0])  # exponential
 
     def test_backoff_gives_up_after_the_limit(self):
         llm, _ = make_llm([connection_error()] * 10)
@@ -80,7 +81,7 @@ class LLMClient(unittest.TestCase):
     def test_log_is_one_json_line_per_call_and_never_holds_the_key(self):
         llm, _ = make_llm(['{"x": 1}'])
         llm.ask("t", "sys", "p", SCHEMA)
-        lines = [json.loads(l) for l in llm.log_path.read_text(encoding="utf-8").splitlines()]
+        lines = [json.loads(line) for line in llm.log_path.read_text(encoding="utf-8").splitlines()]
         self.assertEqual(lines[0]["source"], "api")
         self.assertEqual(lines[0]["input_tokens"], 100)
         self.assertNotIn("sk-ant", llm.log_path.read_text(encoding="utf-8"))

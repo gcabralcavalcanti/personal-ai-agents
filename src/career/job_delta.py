@@ -12,6 +12,7 @@ duplicated, and it writes only to its own output folder (no task manager, no spr
 Usage:  python src/career/job_delta.py <sources.csv> <out_dir> [--dry]
 CSV columns (semicolon-separated): area;company;link        (see examples/job_sources.csv)
 """
+
 import csv
 import hashlib
 import json
@@ -36,8 +37,13 @@ def http_get(url, timeout=25):
 def titles_greenhouse(board, get=http_get):
     _, body = get(f"https://boards-api.greenhouse.io/v1/boards/{board}/jobs?content=false")
     jobs = json.loads(body).get("jobs", [])
-    return sorted({f"{j['title'].strip()} - {(j.get('location') or {}).get('name', '')}"
-                   for j in jobs if KEYWORDS.search(j.get("title") or "")})
+    return sorted(
+        {
+            f"{j['title'].strip()} - {(j.get('location') or {}).get('name', '')}"
+            for j in jobs
+            if KEYWORDS.search(j.get("title") or "")
+        }
+    )
 
 
 def titles_generic(html):
@@ -61,7 +67,7 @@ def collect(url, get=http_get):
         text, items = titles_generic(html)
         base = "\n".join(items) if items else re.sub(r"\d", "", text)[:20000]  # digits removed: dates/counters
         return {"kind": "page", "items": items, "hash": hashlib.sha1(base.encode("utf-8", "ignore")).hexdigest()}
-    except Exception as e:  # noqa: BLE001 - one bad source must not stop the run
+    except Exception as e:
         return {"kind": "error", "items": [], "hash": None, "error": str(e)[:160]}
 
 
@@ -92,19 +98,33 @@ def run(sources, state, today, get=http_get, pause=1.0):
         res = collect(url, get)
         status, new, gone = diff(state.get(url, {}), res)
         rows.append((area, company, url, status, new, gone))
-        new_state[url] = {"area": area, "company": company, "hash": res["hash"], "items": sorted(res["items"]),
-                          "date": today, "error": res.get("error")}
+        new_state[url] = {
+            "area": area,
+            "company": company,
+            "hash": res["hash"],
+            "items": sorted(res["items"]),
+            "date": today,
+            "error": res.get("error"),
+        }
         time.sleep(pause)  # polite crawling
     return new_state, rows
 
 
 def render(rows, today):
     n_new = sum(len(r[4]) for r in rows)
-    md = [f"# Job-board delta - {today}", "", f"{len(rows)} sources - {n_new} new openings", "",
-          "| Area | Company | Status | New | Gone |", "|---|---|---|---|---|"]
+    md = [
+        f"# Job-board delta - {today}",
+        "",
+        f"{len(rows)} sources - {n_new} new openings",
+        "",
+        "| Area | Company | Status | New | Gone |",
+        "|---|---|---|---|---|",
+    ]
     for area, company, url, status, new, gone in rows:
         if status.startswith(("CHANGED", "first", "error")):
-            md.append(f"| {area} | [{company}]({url}) | {status} | {' / '.join(new) or '-'} | {' / '.join(gone) or '-'} |")
+            md.append(
+                f"| {area} | [{company}]({url}) | {status} | {' / '.join(new) or '-'} | {' / '.join(gone) or '-'} |"
+            )
     return "\n".join(md) + "\n"
 
 

@@ -1,17 +1,10 @@
-"""planner.py - the Secretary's planner step through the Claude API, feeding the deterministic validator.
+"""Planner step for the Todoist gate: the model proposes a batch, code checks it against the board.
 
-The model turns a request + the task board into a proposed batch (JSON Schema: schemas/planner_batch.json).
-Code then does everything a rule can do:
-  - `assemble` builds the full batch for check_batch.py: board facts (today, overdue tasks, pins,
-    dependencies, budget, sleep time) come from the board, never from the model;
-  - `validate` runs check_batch.py plus checks only the board can answer: LOST_TASK (a task on a rewritten
-    day vanished), the days the change touches (a moved task's origin day must be in the batch), and
-    UNFULFILLED (the model must say when it could not do part of the request; that goes to the human);
-  - `writes` turns a closed batch into the exact Todoist tool calls the hook will see.
-
-This is a re-implementation for the public repo: in production the planner is the Claude Code session
-itself and the board comes from the Todoist MCP connector; the validator and the hook are the same idea.
+Board facts (today, overdue tasks, pins, dependencies, limits) always come from the board, never from the model.
+`validate` adds three board checks to check_batch.py: LOST_TASK, the origin day of a moved task, and UNFULFILLED
+(the model must say when it could not do the whole request). In production the planner is the Claude Code session.
 """
+
 from __future__ import annotations
 
 import json
@@ -45,17 +38,21 @@ def _wd(iso: str) -> str:
 def board_view(board: dict, scope: str) -> str:
     """'day': only the day the request names (how the original failure happened); 'full': everything."""
     tomorrow = (date.fromisoformat(board["today"]) + timedelta(days=1)).isoformat()
-    lines = [f"Today: {_wd(board['today'])}, now {board['now']}; tomorrow is {_wd(tomorrow)}. "
-             f"Daily budget {board['budget_hours']} h, "
-             f"sleep at {board['sleep_start']}."]
+    lines = [
+        f"Today: {_wd(board['today'])}, now {board['now']}; tomorrow is {_wd(tomorrow)}. "
+        f"Daily budget {board['budget_hours']} h, "
+        f"sleep at {board['sleep_start']}."
+    ]
     days = board["days"] if scope == "full" else {board["request_day"]: board["days"].get(board["request_day"], [])}
     for dt, items in sorted(days.items()):
         lines += [f"{_wd(dt)}:", _items_text(items)]
     if scope == "full":
-        lines += ["Overdue: " + ("; ".join(f"{o['content']} (due {o['dueDate']})" for o in board["overdue"]) or "none"),
-                  "Pins: " + "; ".join(f"{p['content']} no later than {p['no_later_than']}" for p in board["pins"]),
-                  "Dependencies: " + "; ".join(f"{d['after']} needs {d['before']} first ({d['reason']})"
-                                               for d in board["dependencies"])]
+        lines += [
+            "Overdue: " + ("; ".join(f"{o['content']} (due {o['dueDate']})" for o in board["overdue"]) or "none"),
+            "Pins: " + "; ".join(f"{p['content']} no later than {p['no_later_than']}" for p in board["pins"]),
+            "Dependencies: "
+            + "; ".join(f"{d['after']} needs {d['before']} first ({d['reason']})" for d in board["dependencies"]),
+        ]
     return "\n".join(lines)
 
 
@@ -75,8 +72,10 @@ def propose(llm: LLM, board: dict, scope: str, feedback: str = "") -> dict:
                 if len(it["start"]) != 5 or it["start"][2] != ":":
                     bad.append(f"start {it['start']!r} of {it['content']!r} is not HH:MM")
         return bad
-    return llm.ask("planner", SYSTEM, prompt, load_schema("planner_batch"), check=check, max_tokens=4000,
-                   effort="medium")
+
+    return llm.ask(
+        "planner", SYSTEM, prompt, load_schema("planner_batch"), check=check, max_tokens=4000, effort="medium"
+    )
 
 
 def _origin(board: dict, with_overdue: bool = False) -> dict:
@@ -94,15 +93,26 @@ def assemble(board: dict, proposal: dict) -> dict:
         for it in d["items"]:
             o = origin.get(it["content"].lower())
             if o and o[0] != d["date"]:
-                touched.add(o[0])           # a moved task changes its origin day too
+                touched.add(o[0])  # a moved task changes its origin day too
     fixed = {r["content"].lower() for r in proposal["reschedule_overdue"] if r["date"] >= board["today"]}
     fixed |= {it["content"].lower() for d in proposal["days"] if d["date"] >= board["today"] for it in d["items"]}
-    return {"today": board["today"], "now": board["now"], "days_touched": sorted(touched),
-            "overdue": [o for o in board["overdue"] if o["content"].lower() not in fixed],
-            "pins": board["pins"], "dependencies": board["dependencies"],
-            "days": [{"date": d["date"], "budget_hours": board["budget_hours"], "sleep_start": board["sleep_start"],
-                      "items": [{k: v for k, v in it.items() if k != "timebox" or v} for it in d["items"]]}
-                     for d in sorted(proposal["days"], key=lambda d: d["date"])]}
+    return {
+        "today": board["today"],
+        "now": board["now"],
+        "days_touched": sorted(touched),
+        "overdue": [o for o in board["overdue"] if o["content"].lower() not in fixed],
+        "pins": board["pins"],
+        "dependencies": board["dependencies"],
+        "days": [
+            {
+                "date": d["date"],
+                "budget_hours": board["budget_hours"],
+                "sleep_start": board["sleep_start"],
+                "items": [{k: v for k, v in it.items() if k != "timebox" or v} for it in d["items"]],
+            }
+            for d in sorted(proposal["days"], key=lambda d: d["date"])
+        ],
+    }
 
 
 def validate(board: dict, proposal: dict) -> tuple[dict, str]:
@@ -114,7 +124,9 @@ def validate(board: dict, proposal: dict) -> tuple[dict, str]:
             if it["content"].lower() not in placed:
                 res["blockers"].append(f'LOST_TASK: "{it["content"]}" was on {d["date"]} and is in no day of the batch')
     if not proposal.get("request_fulfilled", True):
-        res["decisions"].append(f'UNFULFILLED: the planner could not do the whole request - {proposal.get("open_question", "")}')
+        res["decisions"].append(
+            f"UNFULFILLED: the planner could not do the whole request - {proposal.get('open_question', '')}"
+        )
     res["ok"] = res["ok"] and not res["blockers"] and not res["decisions"]
     return res, report(res)
 
@@ -132,8 +144,9 @@ def writes(board: dict, proposal: dict) -> list[dict]:
         for it in d["items"]:
             o = origin.get(it["content"].lower())
             if o is None:
-                adds.append({"content": it["content"], "dueString": due(d["date"], it["start"]),
-                             "duration": it["duration_min"]})
+                adds.append(
+                    {"content": it["content"], "dueString": due(d["date"], it["start"]), "duration": it["duration_min"]}
+                )
             elif (o[0], o[1]["start"]) != (d["date"], it["start"]):
                 moves.append({"id": o[1]["id"], "content": it["content"], "dueString": due(d["date"], it["start"])})
     overdue = {o["content"].lower(): o for o in board["overdue"]}

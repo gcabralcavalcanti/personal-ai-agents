@@ -1,18 +1,13 @@
-"""trace.py - one trace.jsonl per run: every stage with status, duration, model calls, tokens and cost.
-
-Cost has two columns: what the step paid now (cost_usd) and, for answers replayed from recordings, what
-they cost when they were recorded (recorded_cost_usd). Tokens count both.
+"""One trace.jsonl per run: stage, status, duration, model calls, tokens and cost.
 
     tr = Trace("demo", llm)
     with tr.step("planner", round=1) as s:
-        ...                       # anything; LLM usage inside the block is attributed to this step
-        s["status"] = "blocked"   # optional: ok (default) | blocked | error | skipped
-        s["detail"] = "3 errors"
-    tr.close()                    # writes a final "run" line with the totals
+        s["status"] = "blocked"      # ok by default; blocked | error | skipped
+    tr.close()
 
-The file lands in runs/<name>-<timestamp>/trace.jsonl (git-ignored). `python src/tracing/view.py <file>`
-shows it as a table, or as a static HTML page with --html.
+Answers replayed from recordings report what they cost when recorded (recorded_cost_usd).
 """
+
 from __future__ import annotations
 
 import json
@@ -39,8 +34,14 @@ class Trace:
         m = self.llm
         if m is None:
             return 0, 0, 0, 0, 0.0, 0.0
-        return (m.calls, m.cache_hits, m.tokens_in + m.replayed_in, m.tokens_out + m.replayed_out,
-                m.cost_usd(), m.cost_usd(replayed=True))
+        return (
+            m.calls,
+            m.cache_hits,
+            m.tokens_in + m.replayed_in,
+            m.tokens_out + m.replayed_out,
+            m.cost_usd(),
+            m.cost_usd(replayed=True),
+        )
 
     @contextmanager
     def step(self, stage: str, **meta):
@@ -53,23 +54,34 @@ class Trace:
             raise
         finally:
             after = self._usage()
-            rec.update(duration_ms=int((time.monotonic() - t0) * 1000), api_calls=after[0] - before[0],
-                       recorded_answers=after[1] - before[1], input_tokens=after[2] - before[2],
-                       output_tokens=after[3] - before[3], cost_usd=round(after[4] - before[4], 6),
-                       recorded_cost_usd=round(after[5] - before[5], 6),
-                       ts=datetime.now(timezone.utc).isoformat(timespec="seconds"))
+            rec.update(
+                duration_ms=int((time.monotonic() - t0) * 1000),
+                api_calls=after[0] - before[0],
+                recorded_answers=after[1] - before[1],
+                input_tokens=after[2] - before[2],
+                output_tokens=after[3] - before[3],
+                cost_usd=round(after[4] - before[4], 6),
+                recorded_cost_usd=round(after[5] - before[5], 6),
+                ts=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            )
             self.steps.append(rec)
             self._write(rec)
 
     def close(self, **meta) -> dict:
-        tot = {k: sum(s[k] for s in self.steps) for k in
-               ("api_calls", "recorded_answers", "input_tokens", "output_tokens")}
-        line = {"stage": "run", "run_id": self.run_id, **meta, **tot,
-                "status": "error" if any(s["status"] == "error" for s in self.steps) else "ok",
-                "duration_ms": int((time.monotonic() - self.t0) * 1000),
-                "cost_usd": round(sum(s["cost_usd"] for s in self.steps), 6),
-                "recorded_cost_usd": round(sum(s["recorded_cost_usd"] for s in self.steps), 6),
-                "detail": f"{len(self.steps)} steps"}
+        tot = {
+            k: sum(s[k] for s in self.steps) for k in ("api_calls", "recorded_answers", "input_tokens", "output_tokens")
+        }
+        line = {
+            "stage": "run",
+            "run_id": self.run_id,
+            **meta,
+            **tot,
+            "status": "error" if any(s["status"] == "error" for s in self.steps) else "ok",
+            "duration_ms": int((time.monotonic() - self.t0) * 1000),
+            "cost_usd": round(sum(s["cost_usd"] for s in self.steps), 6),
+            "recorded_cost_usd": round(sum(s["recorded_cost_usd"] for s in self.steps), 6),
+            "detail": f"{len(self.steps)} steps",
+        }
         self._write(line)
         return line
 

@@ -1,14 +1,19 @@
 """Privacy layers: allowlist selection and the denylist audit that aborts publishing."""
+
 import unittest
 
 import _path  # noqa: F401
+
 from privacy import public_filter as pf
 
 
 class PublicFilter(unittest.TestCase):
     def test_allowlist_and_refused_category(self):
-        habits = [{"id": "H01", "category": "study"}, {"id": "H02", "category": "health"},
-                  {"id": "H99", "category": "study"}]
+        habits = [
+            {"id": "H01", "category": "study"},
+            {"id": "H02", "category": "health"},
+            {"id": "H99", "category": "study"},
+        ]
         self.assertEqual([h["id"] for h in pf.select(habits)], ["H01"])
 
     def test_audit_catches_accented_and_uppercase(self):

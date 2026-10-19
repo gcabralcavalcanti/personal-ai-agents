@@ -13,13 +13,14 @@ reconciliation engine and one structural check, so it runs standalone against ex
 Usage:  python src/optimizer/queue.py <root> [--state state.json] [--dry]
 Exit:   0 = ran (findings are not errors) - 2 = usage error
 """
+
 import json
 import os
 import re
 import sys
 from datetime import date
 
-LIMIT_CLAUDE_MD = 200       # lines - official guidance: keep CLAUDE.md under ~200 lines
+LIMIT_CLAUDE_MD = 200  # lines - official guidance: keep CLAUDE.md under ~200 lines
 MANIFEST_FIELDS = ("Purpose", "Autonomy", "Surface", "Cadence", "Out of scope")
 
 
@@ -30,8 +31,11 @@ def item(check, target, detail, sev, sub=""):
 
 def agents(root):
     base = os.path.join(root, "agents")
-    return sorted(os.path.join(base, n) for n in os.listdir(base)
-                  if re.match(r"^\d\d-agent-", n) and os.path.isdir(os.path.join(base, n)))
+    return sorted(
+        os.path.join(base, n)
+        for n in os.listdir(base)
+        if re.match(r"^\d\d-agent-", n) and os.path.isdir(os.path.join(base, n))
+    )
 
 
 def check_structure(root):
@@ -47,7 +51,9 @@ def check_structure(root):
             text = f.read()
         lines = text.splitlines()
         if len(lines) > LIMIT_CLAUDE_MD:
-            out.append(item("size", f"{rel}/CLAUDE.md", f"{len(lines)} lines > {LIMIT_CLAUDE_MD}", "medium", sub="lines"))
+            out.append(
+                item("size", f"{rel}/CLAUDE.md", f"{len(lines)} lines > {LIMIT_CLAUDE_MD}", "medium", sub="lines")
+            )
         section = text.split("## Manifest", 1)[1].split("\n## ", 1)[0] if "## Manifest" in text else ""
         missing = [f for f in MANIFEST_FIELDS if f"**{f}" not in section]
         if missing:
@@ -71,9 +77,14 @@ def reconcile(items, state, today):
 
 def render(items, state, new, closed, today):
     order = {"high": 0, "medium": 1, "low": 2}
-    out = [f"# Optimizer queue - GENERATED on {today.isoformat()} (do not edit by hand)", "",
-           f"Open: **{len(items)}** - new: {len(new)} - closed by themselves (check passed): {len(closed)}", "",
-           "| sev | check | target | detail | since |", "|---|---|---|---|---|"]
+    out = [
+        f"# Optimizer queue - GENERATED on {today.isoformat()} (do not edit by hand)",
+        "",
+        f"Open: **{len(items)}** - new: {len(new)} - closed by themselves (check passed): {len(closed)}",
+        "",
+        "| sev | check | target | detail | since |",
+        "|---|---|---|---|---|",
+    ]
     for i in sorted(items, key=lambda i: (order.get(i["sev"], 3), i["check"], i["target"])):
         out.append(f"| {i['sev']} | {i['check']} | {i['target']} | {i['detail']} | {state[key(i)]['since']} |")
     if closed:

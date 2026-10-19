@@ -25,6 +25,7 @@ Cross-day checks
 Usage:  python src/todoist_gate/check_batch.py <batch.json> [--json] [--no-gate]
 Input format: see examples/batch_ok.json.
 """
+
 import json
 import os
 import sys
@@ -65,8 +66,8 @@ def check_day(day, today, now):
     dt = day["date"]
     timed = sorted((it for it in day.get("items", []) if it.get("start")), key=lambda it: to_min(it["start"]))
     spans = [(to_min(it["start"]), to_min(it["start"]) + it["duration_min"], it) for it in timed]
-    for i, (a0, a1, a) in enumerate(spans):
-        for b0, b1, b in spans[i + 1:]:
+    for i, (_a0, a1, a) in enumerate(spans):
+        for b0, b1, b in spans[i + 1 :]:
             if b0 >= a1:
                 break
             if a.get("timebox") and b1 <= a1:
@@ -83,8 +84,11 @@ def check_day(day, today, now):
     budget = day.get("budget_hours")
     if budget:
         boxes = [(s, e) for s, e, it in spans if it.get("timebox")]
-        used = sum(e - s for s, e, it in spans  # items inside a timebox are already counted by the box
-                   if it.get("timebox") or not any(b0 <= s and e <= b1 for b0, b1 in boxes))
+        used = sum(
+            e - s
+            for s, e, it in spans  # items inside a timebox are already counted by the box
+            if it.get("timebox") or not any(b0 <= s and e <= b1 for b0, b1 in boxes)
+        )
         if used > budget * 60:
             decisions.append(f"[{dt}] BUDGET: {used / 60:.1f}h planned > {budget}h - which task gets pruned?")
     return errors, decisions
@@ -108,7 +112,7 @@ def check_batch(batch):
         blockers.append(f"PAST_DIRTY: {len(overdue)} overdue task(s) still on the board: {sample}")
     for day in batch["days"]:
         if d(day["date"]) < d(today):
-            blockers.append(f'DAY_IN_PAST: {day["date"]} is before today ({today})')
+            blockers.append(f"DAY_IN_PAST: {day['date']} is before today ({today})")
 
     missing = sorted(set(batch.get("days_touched") or []) - {x["date"] for x in batch["days"]})
     if missing:
@@ -121,8 +125,10 @@ def check_batch(batch):
     for dep in batch.get("dependencies") or []:
         a, b = where.get(dep["before"].lower()), where.get(dep["after"].lower())
         if a and b and d(b) < d(a) + timedelta(days=dep.get("lead_days", 0)):
-            blockers.append(f'DEP_CROSSDAY: "{dep["after"]}" ({b}) needs "{dep["before"]}" ({a}) first, '
-                            f'lead time {dep.get("lead_days", 0)} day(s) - {dep.get("reason", "")}')
+            blockers.append(
+                f'DEP_CROSSDAY: "{dep["after"]}" ({b}) needs "{dep["before"]}" ({a}) first, '
+                f"lead time {dep.get('lead_days', 0)} day(s) - {dep.get('reason', '')}"
+            )
             decisions.append(f'[{b}] DEPENDENCY: move "{dep["after"]}" or bring "{dep["before"]}" forward?')
 
     for pin in batch.get("pins") or []:
@@ -137,7 +143,7 @@ def check_batch(batch):
 def report(res):
     lines = ["STATUS PER DAY"]
     for p in res["days"]:
-        lines.append(f'  {"OK  " if p["ok"] else "OPEN"} {p["date"]}' + "".join(f"\n       - {e}" for e in p["errors"]))
+        lines.append(f"  {'OK  ' if p['ok'] else 'OPEN'} {p['date']}" + "".join(f"\n       - {e}" for e in p["errors"]))
     for title, key in (("GLOBAL BLOCKERS", "blockers"), ("DECISIONS FOR THE HUMAN", "decisions")):
         if res[key]:
             lines += ["", title] + [f"  - {x}" for x in res[key]]

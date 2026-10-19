@@ -1,4 +1,5 @@
 """Runs the hook exactly as Claude Code does: JSON on stdin, exit 2 = blocked. Flags in a temp dir."""
+
 import json
 import os
 import subprocess
@@ -22,8 +23,13 @@ def run(tool, inp, flags=(), age_s=0):
             t0 = time.time() - age_s
             os.utime(p, (t0, t0))
     env = dict(os.environ, GATE_FLAGS_DIR=d)
-    p = subprocess.run([sys.executable, HOOK], input=json.dumps({"tool_name": MCP + tool, "tool_input": inp}),
-                       capture_output=True, text=True, env=env)
+    p = subprocess.run(
+        [sys.executable, HOOK],
+        input=json.dumps({"tool_name": MCP + tool, "tool_input": inp}),
+        capture_output=True,
+        text=True,
+        env=env,
+    )
     return p.returncode, p.stderr
 
 
