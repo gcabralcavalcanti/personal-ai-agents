@@ -13,7 +13,7 @@ unsafe writes, validators that must pass first, human approval, regression tests
 | One request, end to end: round 1 blocked by the validator, round 2 closed, then approval and write; 2 model calls, US$ 0.0013 when recorded, free to replay | `python demo.py` · [`examples/demo_trace.jsonl`](examples/demo_trace.jsonl) |
 | Automated evals of the career skill: **11/12** cases pass, the judge fails **2/2** negative controls | [`evals/scoreboard.csv`](evals/scoreboard.csv) · [`evals/last-run.md`](evals/last-run.md) |
 | Job triage on real public boards: 35 openings, 16 decided by code with no call, 19 by the model, US$ 0.003 | [`examples/triage_report.md`](examples/triage_report.md) |
-| 63 tests, no network, no API key, no Todoist, no Anki | [`tests/`](tests/) |
+| 65 tests, no network, no API key, no Todoist, no Anki | [`tests/`](tests/) |
 
 ![Architecture: request, model, harness, agents, guarded write path, live data](docs/architecture.svg)
 
