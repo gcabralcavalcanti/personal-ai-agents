@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """One request on a fictitious task board: planner (Claude API) -> validator -> approval -> gate hook -> write.
 
-    python demo.py           # replays recorded model answers, no API key needed
+    python demo.py           # replays recorded model answers, no API key needed; asks before writing
+    python demo.py --yes     # approves the write without asking (scripts, CI)
     python demo.py --live    # calls the API for answers not recorded yet
 
 Every stage is written to runs/<run>/trace.jsonl. Nothing touches a real Todoist account.
@@ -46,6 +47,20 @@ def hook(call: dict) -> tuple[int, str]:
         env=dict(os.environ, GATE_FLAGS_DIR=FLAGS),
     )
     return p.returncode, p.stderr.strip()
+
+
+def approve(yes: bool) -> bool:
+    """--yes approves; otherwise ask, and treat no keyboard (pipe, CI, script) as "not approved"."""
+    if yes:
+        print("\n(--yes: approved)")
+        return True
+    if not sys.stdin.isatty():
+        print("\n(no interactive terminal: not approved)")
+        return False
+    try:
+        return input("\nApprove these writes? [y/N] ").strip().lower() == "y"
+    except EOFError:
+        return False
 
 
 def show_proposal(p: dict) -> str:
@@ -110,15 +125,12 @@ def main(argv=None) -> int:
     calls = planner.writes(board, closed)
     with tr.step("human approval") as s:
         say("Approval", "Tool calls to send:\n" + planner.dumps(calls))
-        if sys.stdin.isatty() and "--yes" not in argv:
-            ok = input("\nApprove these writes? [y/N] ").strip().lower() == "y"
-        else:
-            ok = True
-            print("\n(non-interactive run: approval simulated)")
-        s["status"], s["detail"] = ("ok", "approved") if ok else ("blocked", "declined by the human")
+        ok = approve("--yes" in argv)
+        s["status"], s["detail"] = ("ok", "approved") if ok else ("blocked", "not approved")
     if not ok:
-        tr.close(outcome="declined")
-        return 1
+        print("Not approved: nothing written. Run `python demo.py --yes` to approve and see the write.")
+        tr.close(outcome="not approved")
+        return 0
 
     with tr.step("hook: write with a closed batch") as s:
         results = [hook(c) for c in calls]

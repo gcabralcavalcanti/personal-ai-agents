@@ -10,7 +10,7 @@
 | Task | Command |
 |---|---|
 | Run all tests | `python -m unittest discover -s tests` |
-| End-to-end demo (no key) | `python demo.py` (add `--live` to call the API for answers not recorded yet) |
+| End-to-end demo (no key) | `python demo.py` (asks before writing) · `--yes` approves without asking · `--live` calls the API for answers not recorded yet |
 | Show the last run's trace | `python src/tracing/view.py --last` · HTML: add `--html trace.html` |
 | Validate a Todoist batch (opens the gate on success) | `python src/todoist_gate/check_batch.py <batch.json>` |
 | Validate without opening the gate | add `--no-gate` |

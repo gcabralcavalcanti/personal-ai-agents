@@ -19,3 +19,5 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Eval regression gate (replays recorded answers, costs nothing)
         run: python src/agent_evals/run_evals.py --demo --no-save --min-pass 11
+      - name: End-to-end demo (replays recorded answers, costs nothing)
+        run: python demo.py --yes

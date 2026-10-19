@@ -21,10 +21,11 @@ unsafe writes, validators that must pass first, human approval, regression tests
 
 ```
 pip install -r requirements.txt
-python demo.py
+python demo.py          # asks before the write; add --yes to approve without asking (scripts, CI)
 ```
 
-No API key needed: the model's answers were recorded on a live run and replay. On a fictitious task board, the
+No API key needed: the model's answers were recorded on a live run and replay. Without a keyboard (pipe, CI)
+and without `--yes`, the demo stops at the approval, shows what would be written and writes nothing. On a fictitious task board, the
 request "move the weekly report to Thursday morning, run the regression tomorrow afternoon" goes through the
 whole guarded path:
 

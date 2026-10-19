@@ -109,5 +109,40 @@ class Demo(unittest.TestCase):
         self.assertIn("0 API call(s) now", text)
 
 
+class DemoWithoutKeyboard(unittest.TestCase):
+    def test_no_yes_and_no_terminal_means_not_approved_and_exit_0(self):
+        import sys
+
+        import demo
+
+        out, stdin = io.StringIO(), sys.stdin
+        sys.stdin = io.StringIO("")  # a pipe: not a terminal, nothing to read
+        try:
+            with redirect_stdout(out):
+                code = demo.main([])
+        finally:
+            sys.stdin = stdin
+        text = out.getvalue()
+        self.assertEqual(code, 0)
+        self.assertIn("Not approved: nothing written", text)
+        self.assertNotIn("written to the fake board", text)
+
+    def test_eof_at_the_prompt_is_not_approved(self):
+        import demo
+
+        class Tty(io.StringIO):
+            def isatty(self):
+                return True
+
+        import sys
+
+        stdin = sys.stdin
+        sys.stdin = Tty("")
+        try:
+            self.assertFalse(demo.approve(False))
+        finally:
+            sys.stdin = stdin
+
+
 if __name__ == "__main__":
     unittest.main()
