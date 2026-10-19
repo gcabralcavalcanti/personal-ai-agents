@@ -1,0 +1,19 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Unit tests (no network, no API key, no Anki, no Todoist)
+        run: python -m unittest discover -s tests -v
+      - name: Eval regression gate (replays recorded answers, costs nothing)
+        run: python src/agent_evals/run_evals.py --demo --no-save --min-pass 11

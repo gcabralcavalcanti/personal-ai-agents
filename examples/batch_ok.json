@@ -1,0 +1,36 @@
+{
+  "_comment": "Fictitious data. A two-day batch the Secretary proposes after the human said 'move the report to Thursday'.",
+  "today": "2026-03-10",
+  "now": "08:30",
+  "days_touched": ["2026-03-11", "2026-03-12"],
+  "overdue": [],
+  "pins": [
+    {"content": "Send slides to study group", "no_later_than": "2026-03-12", "reason": "group meets Friday"}
+  ],
+  "dependencies": [
+    {"before": "Download dataset", "after": "Run regression", "lead_days": 0, "reason": "needs the data file"}
+  ],
+  "days": [
+    {
+      "date": "2026-03-11",
+      "budget_hours": 10,
+      "sleep_start": "23:00",
+      "items": [
+        {"content": "Deep work: thesis chapter 2", "start": "09:00", "duration_min": 120},
+        {"content": "Admin block", "start": "11:15", "duration_min": 45, "timebox": true},
+        {"content": "Reply to course e-mails", "start": "11:20", "duration_min": 15},
+        {"content": "Download dataset", "start": "14:00", "duration_min": 20},
+        {"content": "Run regression", "start": "14:30", "duration_min": 60}
+      ]
+    },
+    {
+      "date": "2026-03-12",
+      "budget_hours": 10,
+      "sleep_start": "23:00",
+      "items": [
+        {"content": "Weekly report", "start": "10:00", "duration_min": 90},
+        {"content": "Send slides to study group", "start": "16:00", "duration_min": 30}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+data/
+.flags/
+queue-state.json
+out/
+logs/

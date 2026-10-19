@@ -1,0 +1,29 @@
+# Job triage - 2026-10-19 (first live run)
+
+Sources: `config/sources.csv` (public Greenhouse boards). Profile: `config/triage_profile.json` (example candidate).
+A second run on the same delta made 0 calls (idempotent).
+
+New openings: 35 · decided by code: 16 · by the model: 19 · left for next run: 0 · failed checks: 0 · closed: 0
+Model: claude-haiku-5-5 · API calls: 20 · recorded answers reused: 0 · estimated cost: US$ 0.00328
+
+| Decision | Company | Opening | Geography | Graduation | Prep | Reason |
+|---|---|---|---|---|---|---|
+| monitor | BTG Pactual | Analista Junior de Marketing / Branding - São Paulo | acceptable | unknown | medium | Entry-level role in an acceptable city, but the title does not state accepted graduation dates, so graduation fit is unknown. |
+| monitor | BTG Pactual | Analista de Controles Internos / Gestão e Mapeamento de Processos (AN) - São Paulo | acceptable | unknown | medium | Title shows analyst-level role in acceptable city, but graduation dates are not stated, so it is monitored. |
+| monitor | BTG Pactual | Analista de Operações Jr / Middle International - São Paulo | acceptable | unknown | medium | Junior role in an acceptable city, but the title does not state accepted graduation dates, so graduation fit is unknown and the decision defaults to monitor. |
+| monitor | BTG Pactual | Engenheiro(a) de Software Junior(Full stack) / IT Accounting Clients & Finance Report - São Paulo ou Rio de Janeiro | preferred | unknown | medium | Junior level and a preferred city, but the title does not state accepted graduation dates, so graduation fit is unknown and the role is monitored. |
+| monitor | BTG Pactual | Estágio Short Job (4 meses) / Risco Operacional - São Paulo | acceptable | unknown | high | Entry-level internship in an acceptable city, but the title does not state accepted graduation dates and the banking internship process is typically case/exam-heavy, so it is monitored. |
+| monitor | BTG Pactual | Estágio Short Job / Automation - Development - São Paulo, Rio de Janeiro e Remoto | preferred | unknown | medium | Entry-level internship in a preferred city, but the title does not state accepted graduation dates, so the graduation rule leaves it unknown. |
+| monitor | BTG Pactual | Estágio Short Job / Automation - Discovery (Fev/2027) - São Paulo e Rio de Janeiro | preferred | unknown | medium | Entry-level internship in a preferred city, but the title gives no graduation window, so graduation fit is unknown and the decision is monitor. |
+| monitor | BTG Pactual | Estágio Short Job / Automation - Discovery - São Paulo e Rio de Janeiro | preferred | unknown | medium | Entry-level internship in a preferred city, but the title does not state accepted graduation dates, so graduation_rule makes it unknown and decision is monitor. |
+| monitor | BTG Pactual | Estágio em Capacitação e Treinamento - São Paulo | acceptable | unknown | high | Internship level and acceptable city, but the title does not state accepted graduation dates and banking internship processes are typically case or exam-heavy, so monitor. |
+| monitor | BTG Pactual | Estágio em Equity Research - São Paulo | acceptable | unknown | high | Internship level and São Paulo are acceptable, but the title does not state graduation dates and finance internship processes are typically case/exam-heavy, so it is monitored. |
+| monitor | BTG Pactual | Internalizações / IT Products - São Paulo, São Paulo, Brazil | acceptable | unknown | medium | Title does not state accepted graduation dates, so graduation is unknown; the role is not clearly entry level, so it is monitored rather than applied to. |
+| monitor | Stone | Analista Júnior  de Políticas de Crédito / Crédit Business Analyst - Sao Paulo, Sao Paulo, Brasil | acceptable | unknown | medium | Junior level and acceptable city, but the title does not state accepted graduation windows, so graduation fit is unknown. |
+| discard | BTG Pactual | Analista de Auditoria Interna - São Paulo | acceptable | unknown | medium | Title is 'Analista' without internship or junior/entry-level marker, so level rule fails and the role is discarded. |
+| discard | BTG Pactual | Analista de Controles Internos / Tecnologia (AN) - São Paulo | acceptable | unknown | medium | The title 'Analista' is not explicitly internship, trainee or junior level, so the level rule is not clearly met and the opening is discarded as a non-entry role. |
+| discard | BTG Pactual | Analista de Risco Operacional e Controles Internos / Offshore Europa - São Paulo | acceptable | unknown | medium | Title is 'Analista' without an entry-level or internship marker and does not state an accepted graduation window, so level is not entry and graduation is unknown; per decision rule, a mid-level or unclear role is discarded. |
+| discard | BTG Pactual | Programa BTG Talentos / Estágio de Férias UNICAMP 2027.1 - São Paulo | acceptable | does_not_fit | high | Title specifies a 2027.1 vacation internship for UNICAMP students, which does not accept the 2027-07 or 2027-12 graduation windows, so graduation does not fit. |
+| discard | EBANX | Chargeback and Fraud Prevention Product Analyst - Curitiba or São Paulo / Hybrid | outside | unknown | medium | Curitiba is outside the preferred and acceptable cities, and the title does not state an entry-level role, so the rule discards it. |
+| discard | EBANX | Treasury Analyst / India - Mumbai | outside | unknown | medium | Location Mumbai is outside the preferred and acceptable geographies, so the decision rule discards it. |
+| discard | Stone | [Exclusiva PcD] Consultor(a) Comercial Interno / Híbrido - Rio de Janeiro/RJ - Híbrido, Rio de Janeiro | preferred | unknown | medium | Level rule: 'Consultor(a) Comercial Interno' is not an internship, trainee or junior/entry-level role, so it is discarded regardless of the preferred location. |

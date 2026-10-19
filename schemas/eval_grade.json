@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["items"],
+  "properties": {
+    "items": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false, "required": ["item", "passed", "evidence"],
+      "properties": {"item": {"type": "string"}, "passed": {"type": "boolean"},
+                     "evidence": {"type": "string", "description": "the part of the answer that proves it, or what is missing"}}}}
+  }
+}

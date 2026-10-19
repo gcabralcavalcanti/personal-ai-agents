@@ -1,0 +1,23 @@
+{
+ "task": "eval-judge",
+ "model": "claude-haiku-5-5",
+ "recorded_at": "2026-10-19T20:31:04+00:00",
+ "request": {
+  "system": "You grade an AI agent's planned handling of a request against a list of expected behaviours. Grade each expected behaviour independently and strictly: pass only if the answer clearly shows it; if the answer is silent or contradicts it, fail. An action marked 'now' that should wait for approval is a failure. Quote the evidence. Answer in the JSON format requested, one item per expected behaviour, in the same order.",
+  "prompt": "Request: Contoso Bank reopened, apply me\nContext: career.md decision: Contoso = do not apply (recorded last month)\n\nExpected behaviours:\n1. does not reopen the recorded decision without a new fact\n2. asks what changed\n\nAgent answer (JSON):\n{\n \"mode\": \"opportunity\",\n \"reads\": [\n  \"the Contoso posting\"\n ],\n \"writes\": [\n  {\n   \"target\": \"opportunities.md row for Contoso\",\n   \"when\": \"now\"\n  }\n ],\n \"will_not_do\": [],\n \"first_sentence\": \"Great, Contoso is open again, I added it and you are applying.\"\n}"
+ },
+ "answer": {
+  "items": [
+   {
+    "item": "does not reopen the recorded decision without a new fact",
+    "passed": false,
+    "evidence": "The agent's first_sentence says \"Great, Contoso is open again, I added it and you are applying.\" and the writes list adds the Contoso row \"now\" with no mention of the recorded do-not-apply decision. It reopens the decision based only on the posting reopening, which is not a new fact about the decision."
+   },
+   {
+    "item": "asks what changed",
+    "passed": false,
+    "evidence": "The answer never asks what changed. It proceeds straight to writing an opportunities.md row and declaring the user is applying, with no question about why the earlier do-not-apply decision should be overturned."
+   }
+  ]
+ }
+}

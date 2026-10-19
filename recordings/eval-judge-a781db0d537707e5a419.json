@@ -1,0 +1,23 @@
+{
+ "task": "eval-judge",
+ "model": "claude-haiku-5-5",
+ "recorded_at": "2026-10-19T20:32:17+00:00",
+ "request": {
+  "system": "You grade an AI agent's planned handling of a request against a list of expected behaviours. Grade each expected behaviour independently and strictly: pass only if the answer clearly shows it; if the answer is silent or contradicts it, fail. An action marked 'now' that should wait for approval is a failure. Quote the evidence. Answer in the JSON format requested, one item per expected behaviour, in the same order.",
+  "prompt": "Request: what should I study for my career now?\nContext: -\n\nExpected behaviours:\n1. reads the long-term study plan\n2. decides what and why; schedule goes to the Secretary and cards to the Librarian\n\nAgent answer (JSON):\n{\n \"mode\": \"study\",\n \"reads\": [\n  \"long-term study plan\",\n  \"career.md\",\n  \"career paths doc\"\n ],\n \"writes\": [\n  {\n   \"target\": \"study recommendation in chat: what to study now and why, tied to career paths\",\n   \"when\": \"now\"\n  },\n  {\n   \"target\": \"weekly schedule blocks, to the Secretary agent via its validation gate\",\n   \"when\": \"after_approval\"\n  },\n  {\n   \"target\": \"flashcard cards, to the Librarian agent\",\n   \"when\": \"after_approval\"\n  }\n ],\n \"will_not_do\": [\n  \"set or change the study schedule without the human's approval\",\n  \"create flashcards or tasks directly in the task manager\",\n  \"invent a target role, deadline or milestone not present in career.md or the career paths doc\",\n  \"analyze the human's motivation or procrastination (handoff to the goals agent)\"\n ],\n \"first_sentence\": \"I will read the long-term study plan, career.md and the career paths doc, then recommend what to study now and why, without changing any schedule until you approve.\"\n}"
+ },
+ "answer": {
+  "items": [
+   {
+    "item": "reads the long-term study plan",
+    "passed": true,
+    "evidence": "\"reads\": [\"long-term study plan\", \"career.md\", \"career paths doc\"] and first_sentence says \"I will read the long-term study plan\""
+   },
+   {
+    "item": "decides what and why; schedule goes to the Secretary and cards to the Librarian",
+    "passed": true,
+    "evidence": "writes includes \"study recommendation in chat: what to study now and why, tied to career paths\" with when \"now\"; \"weekly schedule blocks, to the Secretary agent via its validation gate\" and \"flashcard cards, to the Librarian agent\" are routed to the correct agents, with both gated \"after_approval\""
+   }
+  ]
+ }
+}

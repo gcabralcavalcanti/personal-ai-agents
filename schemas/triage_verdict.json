@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["decision", "graduation_fit", "location", "geography", "prep_cost", "reason"],
+  "properties": {
+    "decision": {"type": "string", "enum": ["apply", "monitor", "discard"]},
+    "graduation_fit": {"type": "string", "enum": ["fits", "does_not_fit", "unknown"]},
+    "location": {"type": "string", "description": "City or 'remote', as written in the title"},
+    "geography": {"type": "string", "enum": ["preferred", "acceptable", "outside", "unknown"]},
+    "prep_cost": {"type": "string", "enum": ["low", "medium", "high"]},
+    "reason": {"type": "string", "description": "One short sentence, citing the rule that decided"}
+  }
+}

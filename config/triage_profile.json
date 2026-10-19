@@ -1,0 +1,14 @@
+{
+  "_comment": "Example candidate profile used by src/career/triage.py. Edit to your own criteria; the rules are applied in this order.",
+  "candidate": "Economics undergraduate, final year",
+  "graduation_windows": ["2027-07", "2027-12"],
+  "graduation_rule": "The opening must accept at least one graduation window above. Internship and trainee programs usually state the accepted graduation dates; a title alone rarely does, so answer 'unknown' unless the title says it.",
+  "geography": {
+    "preferred": ["Rio de Janeiro"],
+    "acceptable": ["Sao Paulo", "remote"],
+    "rule": "Preferred city first, then acceptable ones. Any other city is 'outside' and cannot be 'apply'."
+  },
+  "level_rule": "Only internship, trainee and junior/entry-level roles. Senior, mid-level (pleno, II, III), specialist, manager and lead roles are discarded.",
+  "prep_cost_rule": "Estimate the preparation effort from the role: case-interview or exam-heavy processes are 'high', standard interviews 'medium', talent pools and open applications 'low'.",
+  "decision_rule": "apply = entry level AND geography preferred or acceptable AND graduation not 'does_not_fit'. monitor = plausible but something is unknown or the cost is high. discard = wrong level, outside geography or graduation does not fit."
+}

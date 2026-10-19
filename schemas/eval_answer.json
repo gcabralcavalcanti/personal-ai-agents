@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["mode", "reads", "writes", "will_not_do", "first_sentence"],
+  "properties": {
+    "mode": {"type": "string", "enum": ["status", "opportunity", "preparation", "research", "cv", "study", "goals", "handoff"],
+             "description": "handoff = the request belongs to another agent"},
+    "reads": {"type": "array", "items": {"type": "string"}},
+    "writes": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false, "required": ["target", "when"],
+      "properties": {"target": {"type": "string"}, "when": {"type": "string", "enum": ["now", "after_approval"]}}}},
+    "will_not_do": {"type": "array", "items": {"type": "string"}},
+    "first_sentence": {"type": "string"}
+  }
+}

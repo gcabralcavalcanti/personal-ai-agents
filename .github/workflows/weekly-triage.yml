@@ -1,0 +1,50 @@
+name: weekly job triage
+
+# Weekly first (owner's decision); daily only after the credit use is measured.
+on:
+  schedule:
+    - cron: "0 10 * * 1"      # Mondays 10:00 UTC
+  workflow_dispatch:
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HAS_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+    steps:
+      - name: Skip when the API key secret is not set
+        if: env.HAS_KEY != 'true'
+        run: echo "ANTHROPIC_API_KEY secret not set - nothing to do."
+      - uses: actions/checkout@v4
+        if: env.HAS_KEY == 'true'
+      - uses: actions/setup-python@v5
+        if: env.HAS_KEY == 'true'
+        with:
+          python-version: "3.12"
+      - if: env.HAS_KEY == 'true'
+        run: pip install -r requirements.txt
+      - name: Restore last week's delta state and verdicts
+        if: env.HAS_KEY == 'true'
+        uses: actions/cache@v4
+        with:
+          path: data/weekly
+          key: triage-state-${{ github.run_id }}
+          restore-keys: triage-state-
+      - name: Job-board delta (public pages only)
+        if: env.HAS_KEY == 'true'
+        run: python src/career/job_delta.py config/sources.csv data/weekly
+      - name: LLM triage of the new openings (capped)
+        if: env.HAS_KEY == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          AGENTS_MAX_CALLS: "15"
+        run: python src/career/triage.py data/weekly --max 15
+      - uses: actions/upload-artifact@v4
+        if: env.HAS_KEY == 'true'
+        with:
+          name: triage-report
+          path: |
+            data/weekly/triage-*.md
+            data/weekly/delta-*.md
+            logs/

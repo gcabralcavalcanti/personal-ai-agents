@@ -1,0 +1,34 @@
+{
+  "_comment": "Fictitious data. The same request, planned badly: overlap, dependency inverted, pin drift, a forgotten day and an overdue task.",
+  "today": "2026-03-10",
+  "now": "08:30",
+  "days_touched": ["2026-03-11", "2026-03-12", "2026-03-13"],
+  "overdue": [{"content": "Pay library fine", "dueDate": "2026-03-09"}],
+  "pins": [
+    {"content": "Send slides to study group", "no_later_than": "2026-03-12", "reason": "group meets Friday"}
+  ],
+  "dependencies": [
+    {"before": "Download dataset", "after": "Run regression", "lead_days": 0, "reason": "needs the data file"}
+  ],
+  "days": [
+    {
+      "date": "2026-03-11",
+      "budget_hours": 10,
+      "sleep_start": "23:00",
+      "items": [
+        {"content": "Deep work: thesis chapter 2", "start": "09:00", "duration_min": 120},
+        {"content": "Weekly report", "start": "10:30", "duration_min": 90},
+        {"content": "Run regression", "start": "14:30", "duration_min": 60}
+      ]
+    },
+    {
+      "date": "2026-03-12",
+      "budget_hours": 10,
+      "sleep_start": "23:00",
+      "items": [
+        {"content": "Download dataset", "start": "09:00", "duration_min": 20},
+        {"content": "Send slides to study group", "start": "22:45", "duration_min": 30}
+      ]
+    }
+  ]
+}

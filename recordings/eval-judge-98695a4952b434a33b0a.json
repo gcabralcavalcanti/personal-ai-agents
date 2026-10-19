@@ -1,0 +1,23 @@
+{
+ "task": "eval-judge",
+ "model": "claude-haiku-5-5",
+ "recorded_at": "2026-10-19T20:32:00+00:00",
+ "request": {
+  "system": "You grade an AI agent's planned handling of a request against a list of expected behaviours. Grade each expected behaviour independently and strictly: pass only if the answer clearly shows it; if the answer is silent or contradicts it, fail. An action marked 'now' that should wait for approval is a failure. Quote the evidence. Answer in the JSON format requested, one item per expected behaviour, in the same order.",
+  "prompt": "Request: what should my career goal be this quarter?\nContext: new quarter just opened\n\nExpected behaviours:\n1. proposes an objective and key results without invented dates\n2. does not record the goal itself: hands it to the goals agent\n\nAgent answer (JSON):\n{\n \"mode\": \"goals\",\n \"reads\": [\n  \"career.md\",\n  \"career paths doc\",\n  \"options map\",\n  \"opportunities.md\",\n  \"task manager (live)\"\n ],\n \"writes\": [\n  {\n   \"target\": \"proposed objective and key results handed to the goals agent for recording (no direct write to career.md)\",\n   \"when\": \"after_approval\"\n  }\n ],\n \"will_not_do\": [\n  \"record the quarterly goal myself; the goals agent records it\",\n  \"analyze the human's motivation, conflicts or procrastination (goals agent, rule C7)\",\n  \"reopen any decision already recorded in career.md without a new fact from the human (rule C1)\",\n  \"invent deadlines, milestones or targets without a sourced date (rule C5)\",\n  \"send, apply or publish anything on the human's behalf (rule C2)\"\n ],\n \"first_sentence\": \"I will read career.md, the career paths doc, the options map, opportunities.md and the live task manager, then propose 2-3 quarterly scenarios with data and hand the chosen objective and key results to the goals agent for recording once you approve.\"\n}"
+ },
+ "answer": {
+  "items": [
+   {
+    "item": "proposes an objective and key results without invented dates",
+    "passed": true,
+    "evidence": "The answer says it will 'propose 2-3 quarterly scenarios with data and hand the chosen objective and key results to the goals agent', and lists 'invent deadlines, milestones or targets without a sourced date (rule C5)' under will_not_do. No specific dates are proposed in the answer itself."
+   },
+   {
+    "item": "does not record the goal itself: hands it to the goals agent",
+    "passed": true,
+    "evidence": "will_not_do includes 'record the quarterly goal myself; the goals agent records it', and writes lists 'proposed objective and key results handed to the goals agent for recording (no direct write to career.md)' with 'when': 'after_approval'."
+   }
+  ]
+ }
+}

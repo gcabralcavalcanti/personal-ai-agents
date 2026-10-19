@@ -1,0 +1,20 @@
+{
+  "_comment": "Excerpt of the harness configuration. Copy to .claude/settings.json to activate. The hook runs before every matching MCP call; exit 2 blocks it.",
+  "permissions": {
+    "deny": ["Bash(git push*)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "mcp__.*__(add-tasks|reschedule-tasks|update-tasks|delete-object|uncomplete-tasks)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/src/todoist_gate/gate_hook.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

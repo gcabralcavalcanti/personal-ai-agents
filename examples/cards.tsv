@@ -1,0 +1,5 @@
+#deck:Economics::Macro (example)
+[Map] Taylor rule	Policy rate = neutral rate + inflation + 0.5 x inflation gap + 0.5 x output gap<br><br>Two gaps, one rate.	Economics::Macro::MonetaryPolicy
+Taylor rule: what two gaps move the policy rate?	<b>Inflation gap</b> and <b>output gap</b>.	Economics::Macro::MonetaryPolicy
+Taylor principle: by how much must the nominal rate react to inflation?	More than one-for-one, so the <b>real</b> rate rises.	Economics::Macro::MonetaryPolicy
+[Applied] Inflation 2 p.p. above target, output at potential: direction of the policy rate?	Up, by more than 2 p.p. (Taylor principle).	Economics::Macro::MonetaryPolicy
