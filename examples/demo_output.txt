@@ -1,0 +1,108 @@
+
+=== Request ===================================================================
+"Move the weekly report to Thursday morning, and I need to run the regression (1 hour) tomorrow afternoon."
+(fictitious board: 2026-03-10, now 08:30; model claude-haiku-5-5, mode demo)
+
+=== 1. The model tries to reschedule right away ===============================
+hook exit 2: BLOCKED (gate): create or reschedule only after the batch passed the checker in the last 15 min. Run python src/todoist_gate/check_batch.py <batch.json>; a CLOSED batch opens the gate for 15 min.
+
+=== 2. Planner, round 1 (sees only the requested day) =========================
+Planner: "I scheduled the 1-hour regression for tomorrow (Wed 2026-03-11) at 14:00, but the weekly report is not on the board, so I could not move it to Thursday morning."
+  2026-03-11
+    14:00  60 min  Regression
+
+Validator:
+STATUS PER DAY
+  OK   2026-03-11
+
+GLOBAL BLOCKERS
+  - PAST_DIRTY: 1 overdue task(s) still on the board: "Pay library fine" (2026-03-09)
+  - LOST_TASK: "Deep work: thesis chapter 2" was on 2026-03-11 and is in no day of the batch
+  - LOST_TASK: "Weekly report" was on 2026-03-11 and is in no day of the batch
+  - LOST_TASK: "Download dataset" was on 2026-03-11 and is in no day of the batch
+  - LOST_TASK: "Gym" was on 2026-03-11 and is in no day of the batch
+
+DECISIONS FOR THE HUMAN
+  - UNFULFILLED: the planner could not do the whole request - The weekly report is not on the board. What is its duration, and should I add it to Thursday 2026-03-12 morning (for example before or after the 09:00 study group prep) with a specific start time?
+
+BATCH OPEN - do not write, do not report done.
+
+=== 3. Planner, round 2 (sees the whole board) ================================
+Planner: "The weekly report (90 min) moves to Thursday 10:00-11:30 after study group prep, the regression runs Wednesday 14:00-15:00 after the dataset download, and the overdue library fine is rescheduled to today at 08:45."
+  2026-03-10
+    08:45  15 min  Pay library fine
+  2026-03-11
+    09:00 120 min  Deep work: thesis chapter 2
+    13:00  20 min  Download dataset
+    14:00  60 min  Run regression
+    18:00  60 min  Gym
+  2026-03-12
+    09:00  60 min  Study group prep
+    10:00  90 min  Weekly report
+    16:00  30 min  Send slides to study group
+  overdue -> 2026-03-10: Pay library fine
+
+Validator:
+STATUS PER DAY
+  OK   2026-03-10
+  OK   2026-03-11
+  OK   2026-03-12
+
+BATCH CLOSED - safe to write.
+
+=== Approval ==================================================================
+Tool calls to send:
+[
+ {
+  "tool_name": "mcp__todoist__reschedule-tasks",
+  "tool_input": {
+   "tasks": [
+    {
+     "id": "t7",
+     "content": "Pay library fine",
+     "dueString": "Mar 10 at 08:45"
+    },
+    {
+     "id": "t2",
+     "content": "Weekly report",
+     "dueString": "Mar 12 at 10:00"
+    }
+   ]
+  }
+ },
+ {
+  "tool_name": "mcp__todoist__add-tasks",
+  "tool_input": {
+   "tasks": [
+    {
+     "content": "Run regression",
+     "dueString": "Mar 11 at 14:00",
+     "duration": 60
+    }
+   ]
+  }
+ }
+]
+
+(non-interactive run: approval simulated)
+
+=== The same hook, now with the batch closed ==================================
+reschedule-tasks: exit 0, add-tasks: exit 0
+3 task(s) written to the fake board.
+
+=== Trace =====================================================================
+Stage                               Status    ms       Calls  Replay  Tok in   Tok out  US$ now    US$ rec.   Detail                                        
+----------------------------------  --------  -------  -----  ------  -------  -------  ---------  ---------  ----------------------------------------------
+hook: write before any batch        blocked   51       0      0       0        0        0.00000    0.00000    BLOCKED (gate): create or reschedule only aft…
+planner (Claude API) round=1        ok        0        0      1       1255     576      0.00000    0.00041    scope=day; 1 day(s)                           
+validator (check_batch) round=1     blocked   0        0      0       0        0        0.00000    0.00000    6 problem(s)                                  
+planner (Claude API) round=2        ok        0        0      1       1781     1450     0.00000    0.00090    scope=full; 3 day(s)                          
+validator (check_batch) round=2     ok        0        0      0       0        0        0.00000    0.00000    batch closed                                  
+human approval                      ok        0        0      0       0        0        0.00000    0.00000    approved                                      
+hook: write with a closed batch     ok        106      0      0       0        0        0.00000    0.00000    reschedule-tasks: exit 0, add-tasks: exit 0   
+write (fake Todoist)                ok        0        0      0       0        0        0.00000    0.00000    3 task(s) written                             
+----------------------------------  --------  -------  -----  ------  -------  -------  ---------  ---------  ----------------------------------------------
+run                                 ok        164      0      2       3036     2026     0.00000    0.00132    8 steps                                       
+
+0 API call(s) now (US$ 0.00000); 2 recorded answer(s) replayed (they cost US$ 0.00132 when recorded).
+Trace: runs/demo-20261019-184110/trace.jsonl - HTML view: python src/tracing/view.py --last --html trace.html

@@ -10,6 +10,8 @@
 | Task | Command |
 |---|---|
 | Run all tests | `python -m unittest discover -s tests` |
+| End-to-end demo (no key) | `python demo.py` (add `--live` to call the API for answers not recorded yet) |
+| Show the last run's trace | `python src/tracing/view.py --last` · HTML: add `--html trace.html` |
 | Validate a Todoist batch (opens the gate on success) | `python src/todoist_gate/check_batch.py <batch.json>` |
 | Validate without opening the gate | add `--no-gate` |
 | Approve a schedule-rule change / a delete (after the human's ok) | `python src/todoist_gate/release.py I7` / `DELETE` |
@@ -33,6 +35,7 @@
 | `BudgetExceeded` | the run reached its call cap | raise `--max` / `AGENTS_MAX_CALLS` on purpose; what was left is triaged next run |
 | `answer failed checks after retries` | the model broke a business rule twice | read the log line (`logs/`); fix the prompt or the profile, never loosen the check silently |
 | Eval score below the gate in CI | a change in the skill or the cases made a case fail | read `evals/last-run.md`; fix the skill (or the case, if it was ambiguous), re-run live, commit the new recordings |
+| Demo ends with `BATCH OPEN after 3 rounds` | the planner could not produce a valid batch (or said it could not fulfil the request) | intended outcome: nothing is written; read the validator report and the planner's open question |
 | `JUDGE TOO LENIENT` | the judge passed a deliberately wrong answer | the run is invalid; tighten the judge prompt before trusting any score |
 | `error: ...` rows in the job delta | site down or layout changed | the run continues; check the source next run |
 | Public filter `ABORT` | a forbidden term reached the rendered page | fix the allowlist or the generator; never bypass the audit |

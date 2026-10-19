@@ -25,6 +25,7 @@ Usage:  python src/agent_evals/run_evals.py [--demo] [--max 40] [--only K01,K04]
 from __future__ import annotations
 
 import argparse
+import contextlib
 import csv
 import hashlib
 import json
@@ -35,6 +36,7 @@ from datetime import date
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from llm import config  # noqa: E402
 from llm.client import LLM, load_schema  # noqa: E402
+from tracing.trace import Trace  # noqa: E402
 
 EVALS = config.ROOT / "evals"
 AGENT_SYSTEM_TAIL = ("\n\n---\nYou are the agent described above. Do not perform the request: say how you would "
@@ -69,11 +71,18 @@ def grade(llm: LLM, case: dict, answer: dict) -> list[dict]:
     return llm.ask("eval-judge", JUDGE_SYSTEM, prompt, load_schema("eval_grade"), check=same_items)["items"]
 
 
-def run(llm: LLM, cases, controls, skill):
+def run(llm: LLM, cases, controls, skill, trace=None):
+    def step(stage, **meta):
+        return trace.step(stage, **meta) if trace else contextlib.nullcontext({})
     results = []
     for case in cases:
-        answer = agent_answer(llm, skill, case)
-        items = grade(llm, case, answer)
+        with step("eval: agent answer", case=case["id"]) as st:
+            answer = agent_answer(llm, skill, case)
+            st["detail"] = f"mode={answer['mode']}"
+        with step("eval: judge", case=case["id"]) as st:
+            items = grade(llm, case, answer)
+            st["detail"] = f"{sum(i['passed'] for i in items)}/{len(items)} items"
+            st["status"] = "ok" if answer["mode"] in case["mode"] and all(i["passed"] for i in items) else "blocked"
         mode_ok = answer["mode"] in case["mode"]
         results.append({"id": case["id"], "request": case["request"], "mode": answer["mode"],
                         "mode_expected": case["mode"], "mode_ok": mode_ok, "items": items,
@@ -81,7 +90,9 @@ def run(llm: LLM, cases, controls, skill):
     by_id = {c["id"]: c for c in cases}
     control_results = []
     for ctl in controls:
-        items = grade(llm, by_id[ctl["case"]], ctl["answer"])
+        with step("eval: negative control", case=ctl["case"]) as st:
+            items = grade(llm, by_id[ctl["case"]], ctl["answer"])
+            st["detail"] = "judge failed it (good)" if not all(i["passed"] for i in items) else "JUDGE PASSED IT"
         control_results.append({"case": ctl["case"], "judge_failed_it": not all(i["passed"] for i in items),
                                 "items": items})
     return results, control_results
@@ -122,7 +133,9 @@ def main(argv=None) -> int:
         cases = [c for c in cases if c["id"] in keep]
         controls = [c for c in controls if c["case"] in keep]
     llm = LLM(mode="demo" if a.demo else "auto", max_calls=a.max)
-    results, control_results = run(llm, cases, controls, skill)
+    tr = Trace("evals", llm)
+    results, control_results = run(llm, cases, controls, skill, trace=tr)
+    tr.close(passed=sum(r["passed"] for r in results), total=len(results))
     skill_hash = hashlib.sha256(skill.encode("utf-8")).hexdigest()[:12]
     today = date.today().isoformat()
     md = report(results, control_results, skill_hash, llm.summary(), today)

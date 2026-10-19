@@ -82,6 +82,7 @@ class LLM:
         self.log_path = Path(log_dir) / f"run-{datetime.now():%Y%m%d-%H%M%S}.jsonl"
         self.sleep = sleep
         self.calls = self.cache_hits = self.tokens_in = self.tokens_out = 0
+        self.replayed_in = self.replayed_out = 0   # tokens the replayed answers cost when they were recorded
         self._client = None
         if key:
             import anthropic
@@ -89,38 +90,50 @@ class LLM:
 
     # ------------------------------------------------------------------ public
     def ask(self, task: str, system: str, prompt: str, schema: dict,
-            check: Callable[[dict], list[str]] | None = None, max_tokens: int = config.MAX_TOKENS) -> dict:
-        """Return a dict that matches `schema` and passes `check` (a list of problems; empty = ok)."""
-        key = request_hash({"model": config.MODEL, "system": system, "prompt": prompt,
-                            "schema": schema, "max_tokens": max_tokens})
+            check: Callable[[dict], list[str]] | None = None, max_tokens: int = config.MAX_TOKENS,
+            effort: str = "low") -> dict:
+        """Return a dict that matches `schema` and passes `check` (a list of problems; empty = ok).
+        effort: 'low' (default, thinking off) or 'medium'/'high' (adaptive thinking, for planning steps)."""
+        req = {"model": config.MODEL, "system": system, "prompt": prompt, "schema": schema, "max_tokens": max_tokens}
+        if effort != "low":
+            req["effort"] = effort
+        key = request_hash(req)
         path = self.recordings / f"{task}-{key}.json"
         if path.exists():
+            rec = json.loads(path.read_text(encoding="utf-8"))
             self.cache_hits += 1
+            used = rec.get("usage", {})
+            self.replayed_in += used.get("input_tokens", 0)
+            self.replayed_out += used.get("output_tokens", 0)
             self._log(task, key, "recording")
-            return json.loads(path.read_text(encoding="utf-8"))["answer"]
+            return rec["answer"]
         if self.mode == "demo":
             raise NoRecording(f"No recorded answer for {task} ({key}); run once with an API key.")
 
         problems: list[str] = []
         user = prompt
+        spent = [0, 0]
         for attempt in range(config.SCHEMA_RETRIES + 1):
             t0 = time.monotonic()
-            answer, usage = self._call(system, user, schema, max_tokens)
+            answer, usage = self._call(system, user, schema, max_tokens, effort)
+            spent = [spent[0] + usage[0], spent[1] + usage[1]]
             problems = self.problems(answer, schema, check)
             self._log(task, key, "api", usage, problems, attempt, int((time.monotonic() - t0) * 1000))
             if not problems:
                 path.write_text(json.dumps({"task": task, "model": config.MODEL,
                                             "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
                                             "request": {"system": system, "prompt": prompt},
+                                            "usage": {"input_tokens": spent[0], "output_tokens": spent[1]},
                                             "answer": answer}, ensure_ascii=False, indent=1), encoding="utf-8")
                 return answer
             user = (prompt + "\n\nYour previous answer was rejected by the checker:\n- "
                     + "\n- ".join(problems) + "\nAnswer again, fixing these points.")
         raise ValueError(f"{task}: answer failed checks after retries: {problems}")
 
-    def cost_usd(self) -> float:
+    def cost_usd(self, replayed: bool = False) -> float:
         p_in, p_out = config.PRICE_PER_MTOK.get(config.MODEL, (0.0, 0.0))
-        return (self.tokens_in * p_in + self.tokens_out * p_out) / 1e6
+        tin, tout = (self.replayed_in, self.replayed_out) if replayed else (self.tokens_in, self.tokens_out)
+        return (tin * p_in + tout * p_out) / 1e6
 
     def summary(self) -> dict:
         return {"mode": self.mode, "model": config.MODEL, "api_calls": self.calls,
@@ -138,7 +151,7 @@ class LLM:
         return check(answer) if check else []
 
     # ----------------------------------------------------------------- private
-    def _call(self, system: str, user: str, schema: dict, max_tokens: int):
+    def _call(self, system: str, user: str, schema: dict, max_tokens: int, effort: str = "low"):
         if self.calls >= self.max_calls:
             raise BudgetExceeded(f"Call cap reached ({self.max_calls} per run).")
         self.calls += 1
@@ -147,8 +160,8 @@ class LLM:
             max_tokens=max_tokens,
             system=system,
             messages=[{"role": "user", "content": user}],
-            thinking={"type": "disabled"},
-            output_config={"effort": "low", "format": {"type": "json_schema", "schema": schema}},
+            thinking={"type": "disabled"} if effort == "low" else {"type": "adaptive"},
+            output_config={"effort": effort, "format": {"type": "json_schema", "schema": schema}},
         ))
         usage = (response.usage.input_tokens, response.usage.output_tokens)
         self.tokens_in += usage[0]

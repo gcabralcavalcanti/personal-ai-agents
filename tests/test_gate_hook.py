@@ -39,6 +39,11 @@ class GateHook(unittest.TestCase):
     def test_r2_with_flag_passes(self):
         self.assertEqual(run("update-tasks", {"tasks": [{"id": "x", "dueString": "tomorrow"}]}, ["I7-OK"])[0], 0)
 
+    def test_r2_expired_flag_blocks(self):
+        code, err = run("update-tasks", {"tasks": [{"id": "x", "dueString": "every thu"}]}, ["I7-OK"], age_s=16 * 60)
+        self.assertEqual(code, 2)
+        self.assertIn("older than 15 minutes", err)
+
     def test_update_without_due_passes(self):
         self.assertEqual(run("update-tasks", {"tasks": [{"id": "x", "content": "rename"}]})[0], 0)
 

@@ -1,0 +1,24 @@
+{
+  "_comment": "Fictitious task board used by demo.py. today/now anchor the run; budget and sleep_start apply to every day.",
+  "today": "2026-03-10",
+  "now": "08:30",
+  "budget_hours": 9,
+  "sleep_start": "23:00",
+  "days": {
+    "2026-03-11": [
+      {"id": "t1", "content": "Deep work: thesis chapter 2", "start": "09:00", "duration_min": 120},
+      {"id": "t2", "content": "Weekly report", "start": "11:30", "duration_min": 90},
+      {"id": "t5", "content": "Download dataset", "start": "13:00", "duration_min": 20},
+      {"id": "t3", "content": "Gym", "start": "18:00", "duration_min": 60}
+    ],
+    "2026-03-12": [
+      {"id": "t4", "content": "Study group prep", "start": "09:00", "duration_min": 60},
+      {"id": "t6", "content": "Send slides to study group", "start": "16:00", "duration_min": 30}
+    ]
+  },
+  "overdue": [{"id": "t7", "content": "Pay library fine", "dueDate": "2026-03-09", "duration_min": 15}],
+  "pins": [{"content": "Send slides to study group", "no_later_than": "2026-03-12", "reason": "group meets Friday"}],
+  "dependencies": [{"before": "Download dataset", "after": "Run regression", "lead_days": 0, "reason": "needs the data file"}],
+  "request": "Move the weekly report to Thursday morning, and I need to run the regression (1 hour) tomorrow afternoon.",
+  "request_day": "2026-03-12"
+}

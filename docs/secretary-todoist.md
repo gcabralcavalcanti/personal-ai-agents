@@ -42,3 +42,11 @@ GLOBAL BLOCKERS  - PAST_DIRTY: 1 overdue task(s) still on the board
 BATCH OPEN - do not write, do not report done.
 ```
 The corrected proposal (`examples/batch_ok.json`) closes the batch and opens the gate.
+
+## Run it end to end
+`python demo.py` plays one request on a fictitious board: the hook blocks a write with no batch, the planner
+(Claude API, recorded answers) proposes, the validator rejects round 1 and closes round 2, the human approves,
+the hook lets the exact calls through, and every stage lands in a trace. The planner is
+`src/todoist_gate/planner.py`; in production that role is the Claude Code session itself.
+Why the hook exists: [case study](case-study-recurrence-gate.md).
+

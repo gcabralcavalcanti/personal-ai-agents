@@ -1,0 +1,91 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "days",
+    "reschedule_overdue",
+    "request_fulfilled",
+    "open_question",
+    "summary"
+  ],
+  "properties": {
+    "days": {
+      "type": "array",
+      "description": "Every day the plan changes, each with its COMPLETE list of timed items after the change",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "date",
+          "items"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "YYYY-MM-DD"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "content",
+                "start",
+                "duration_min",
+                "timebox"
+              ],
+              "properties": {
+                "content": {
+                  "type": "string"
+                },
+                "start": {
+                  "type": "string",
+                  "description": "HH:MM, 24h"
+                },
+                "duration_min": {
+                  "type": "integer"
+                },
+                "timebox": {
+                  "type": "boolean",
+                  "description": "true only for a block that holds smaller tasks"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "reschedule_overdue": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "content",
+          "date"
+        ],
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "summary": {
+      "type": "string",
+      "description": "One sentence for the human"
+    },
+    "request_fulfilled": {
+      "type": "boolean",
+      "description": "false if any part of the request could not be done"
+    },
+    "open_question": {
+      "type": "string",
+      "description": "what the human must decide when request_fulfilled is false; empty otherwise"
+    }
+  }
+}

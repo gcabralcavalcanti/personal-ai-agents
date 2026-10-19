@@ -7,3 +7,5 @@ SRC = os.path.join(ROOT, "src")
 EXAMPLES = os.path.join(ROOT, "examples")
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
+if ROOT not in sys.path:
+    sys.path.insert(1, ROOT)  # demo.py lives at the root

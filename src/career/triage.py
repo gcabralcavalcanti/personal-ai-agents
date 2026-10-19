@@ -21,6 +21,7 @@ Usage:  python src/career/triage.py <out_dir> [--profile config/triage_profile.j
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -31,6 +32,7 @@ from datetime import date
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from llm.client import LLM, BudgetExceeded, NoRecording, load_schema  # noqa: E402
 from llm import config  # noqa: E402
+from tracing.trace import Trace  # noqa: E402
 
 SENIORITY = re.compile(r"(?i)\b(s[eê]nior|sr\.?|pleno|especialista|specialist|manager|gerente|coordenador[a]?|"
                        r"lead|head|principal|director|diretor[a]?|ii|iii|iv)\b")
@@ -78,8 +80,8 @@ def pending(state: dict, store: dict) -> list[dict]:
     return out
 
 
-def triage(state: dict, store: dict, profile: dict, llm: LLM, today: str, max_calls: int) -> dict:
-    """Update `store` in place and return run counters."""
+def triage(state: dict, store: dict, profile: dict, llm: LLM, today: str, max_calls: int, trace=None) -> dict:
+    """Update `store` in place and return run counters. `trace`: optional Trace, one step per model call."""
     schema = load_schema("triage_verdict")
     rules = json.dumps({k: v for k, v in profile.items() if not k.startswith("_")}, ensure_ascii=False, indent=1)
     counts = {"new": 0, "by_code": 0, "by_model": 0, "left_for_next_run": 0, "closed": 0, "failed": 0}
@@ -95,7 +97,10 @@ def triage(state: dict, store: dict, profile: dict, llm: LLM, today: str, max_ca
             prompt = (f"Profile and rules:\n{rules}\n\nOpening:\ncompany: {op['company']}\narea: {op['area']}\n"
                       f"title and location: {op['title']}")
             try:
-                verdict = llm.ask("triage", SYSTEM, prompt, schema, check=check)
+                step = trace.step("triage (Claude API)", opening=op["title"][:40]) if trace else contextlib.nullcontext({})
+                with step as st:
+                    verdict = llm.ask("triage", SYSTEM, prompt, schema, check=check)
+                    st["detail"] = f"{verdict['decision']}: {verdict['reason'][:60]}"
                 source = "model"
             except (BudgetExceeded, NoRecording):
                 counts["left_for_next_run"] += 1
@@ -149,7 +154,9 @@ def main(argv=None) -> int:
         profile = json.load(f)
     llm = LLM(mode="demo" if a.demo else "auto", max_calls=min(a.max, config.MAX_CALLS_PER_RUN))
     today = date.today().isoformat()
-    counts = triage(state, store, profile, llm, today, llm.max_calls)
+    tr = Trace("triage", llm)
+    counts = triage(state, store, profile, llm, today, llm.max_calls, trace=tr)
+    tr.close(**{k: v for k, v in counts.items()})
     md = render(store, counts, llm.summary(), today)
     with open(store_path, "w", encoding="utf-8") as f:
         json.dump(store, f, ensure_ascii=False, indent=1)
@@ -157,6 +164,7 @@ def main(argv=None) -> int:
         f.write(md)
     print(md)
     print(json.dumps(llm.summary()))
+    print(f"trace: runs/{tr.run_id}/trace.jsonl")
     return 0
 
 

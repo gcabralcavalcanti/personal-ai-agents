@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 640" width="980" height="640" font-family="Segoe UI, Helvetica, Arial, sans-serif" role="img" aria-labelledby="t d">
+  <title id="t">personal-ai-agents architecture</title>
+  <desc id="d">A request goes to the model inside the Claude Code harness; skills, MCP servers, hooks and Python scripts calling the Claude API serve seven agents; every write to live data passes a validator, a human approval and a gate, and is read back; traces, logs, tests and evals watch every layer.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#4a5568"/>
+    </marker>
+    <style>
+      .bg{fill:#ffffff}
+      .h{font-size:13px;font-weight:700;fill:#1a202c}
+      .t{font-size:12px;fill:#1a202c}
+      .s{font-size:11px;fill:#4a5568}
+      .band{font-size:11px;font-weight:700;fill:#718096;letter-spacing:.08em}
+      .box{fill:#f7fafc;stroke:#a0aec0;stroke-width:1.2}
+      .model{fill:#ebf4ff;stroke:#5a67d8;stroke-width:1.4}
+      .harness{fill:none;stroke:#5a67d8;stroke-width:1.4;stroke-dasharray:6 4}
+      .agent{fill:#ffffff;stroke:#718096;stroke-width:1.1}
+      .guard{fill:#fffaf0;stroke:#dd6b20;stroke-width:1.4}
+      .human{fill:#f0fff4;stroke:#38a169;stroke-width:1.4}
+      .data{fill:#edf2f7;stroke:#4a5568;stroke-width:1.2}
+      .watch{fill:#faf5ff;stroke:#805ad5;stroke-width:1.2}
+      .ln{stroke:#4a5568;stroke-width:1.3;fill:none}
+      @media (prefers-color-scheme: dark){
+        .bg{fill:#171923}.h,.t{fill:#e2e8f0}.s{fill:#a0aec0}.band{fill:#a0aec0}
+        .box{fill:#1f2533;stroke:#4a5568}.model{fill:#1e2547;stroke:#7f9cf5}.harness{stroke:#7f9cf5}
+        .agent{fill:#1a202c;stroke:#718096}.guard{fill:#2d2316;stroke:#ed8936}.human{fill:#18291f;stroke:#48bb78}
+        .data{fill:#2d3748;stroke:#a0aec0}.watch{fill:#251d36;stroke:#9f7aea}.ln{stroke:#a0aec0}
+      }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="980" height="640" rx="12"/>
+
+  <!-- request and model -->
+  <text class="band" x="24" y="34">REQUEST</text>
+  <rect class="box" x="24" y="44" width="230" height="46" rx="8"/>
+  <text class="t" x="38" y="64">"move the report to Thursday"</text>
+  <text class="s" x="38" y="80">chat, or a scheduled routine</text>
+  <path class="ln" d="M254 67H300" marker-end="url(#a)"/>
+  <rect class="model" x="302" y="44" width="250" height="46" rx="8"/>
+  <text class="h" x="316" y="64">Model (Claude)</text>
+  <text class="s" x="316" y="80">reads text, writes text, calls tools</text>
+
+  <!-- harness -->
+  <rect class="harness" x="24" y="110" width="932" height="126" rx="10"/>
+  <text class="band" x="38" y="130">CLAUDE CODE HARNESS: tools, memory, permissions</text>
+  <path class="ln" d="M427 90V140" marker-end="url(#a)"/>
+  <rect class="box" x="38" y="142" width="212" height="80" rx="8"/>
+  <text class="h" x="52" y="164">Skills</text>
+  <text class="s" x="52" y="182">one procedure manual per agent,</text>
+  <text class="s" x="52" y="197">loaded when the request matches;</text>
+  <text class="s" x="52" y="212">the folder is the source of truth</text>
+  <rect class="box" x="264" y="142" width="212" height="80" rx="8"/>
+  <text class="h" x="278" y="164">MCP servers</text>
+  <text class="s" x="278" y="182">Todoist (OAuth connector)</text>
+  <text class="s" x="278" y="197">anki-librarian-mcp (own repo)</text>
+  <text class="s" x="278" y="212">Drive, Gmail (read)</text>
+  <rect class="guard" x="490" y="142" width="212" height="80" rx="8"/>
+  <text class="h" x="504" y="164">Hooks</text>
+  <text class="s" x="504" y="182">scripts run before a tool call;</text>
+  <text class="s" x="504" y="197">exit 2 = the call is blocked</text>
+  <text class="s" x="504" y="212">gate_hook.py</text>
+  <rect class="box" x="716" y="142" width="226" height="80" rx="8"/>
+  <text class="h" x="730" y="164">Python + Claude API</text>
+  <text class="s" x="730" y="182">JSON Schema out, retries, cache,</text>
+  <text class="s" x="730" y="197">call cap, demo mode</text>
+  <text class="s" x="730" y="212">planner · job triage · evals</text>
+
+  <!-- agents -->
+  <text class="band" x="24" y="266">AGENTS (one folder each: runbook, skill, scripts, tests, pending list)</text>
+  <g>
+    <rect class="agent" x="24" y="276" width="124" height="40" rx="20"/><text class="t" x="86" y="300" text-anchor="middle">Secretary</text>
+    <rect class="agent" x="158" y="276" width="124" height="40" rx="20"/><text class="t" x="220" y="300" text-anchor="middle">Librarian</text>
+    <rect class="agent" x="292" y="276" width="124" height="40" rx="20"/><text class="t" x="354" y="300" text-anchor="middle">Habits</text>
+    <rect class="agent" x="426" y="276" width="124" height="40" rx="20"/><text class="t" x="488" y="300" text-anchor="middle">Career</text>
+    <rect class="agent" x="560" y="276" width="124" height="40" rx="20"/><text class="t" x="622" y="300" text-anchor="middle">Optimizer</text>
+    <rect class="agent" x="694" y="276" width="124" height="40" rx="20"/><text class="t" x="756" y="300" text-anchor="middle">Goals &amp; behavior</text>
+    <rect class="agent" x="828" y="276" width="128" height="40" rx="20"/><text class="t" x="892" y="300" text-anchor="middle">Memoir scribe</text>
+  </g>
+  <path class="ln" d="M490 236V272" marker-end="url(#a)"/>
+
+  <!-- guarded write path -->
+  <text class="band" x="24" y="350">EVERY WRITE TO LIVE DATA</text>
+  <rect class="box" x="24" y="360" width="160" height="62" rx="8"/>
+  <text class="h" x="38" y="382">1. Propose</text>
+  <text class="s" x="38" y="400">a batch / a plan,</text>
+  <text class="s" x="38" y="414">never a direct write</text>
+  <path class="ln" d="M184 391H212" marker-end="url(#a)"/>
+  <rect class="guard" x="214" y="360" width="170" height="62" rx="8"/>
+  <text class="h" x="228" y="382">2. Validate (code)</text>
+  <text class="s" x="228" y="400">check_batch, taxonomy,</text>
+  <text class="s" x="228" y="414">duplicates, scope</text>
+  <path class="ln" d="M384 391H412" marker-end="url(#a)"/>
+  <rect class="human" x="414" y="360" width="160" height="62" rx="8"/>
+  <text class="h" x="428" y="382">3. Human approves</text>
+  <text class="s" x="428" y="400">"ok" in chat or form;</text>
+  <text class="s" x="428" y="414">flags expire in 15 min</text>
+  <path class="ln" d="M574 391H602" marker-end="url(#a)"/>
+  <rect class="guard" x="604" y="360" width="160" height="62" rx="8"/>
+  <text class="h" x="618" y="382">4. Gate opens</text>
+  <text class="s" x="618" y="400">hook lets the exact</text>
+  <text class="s" x="618" y="414">tool calls through</text>
+  <path class="ln" d="M764 391H792" marker-end="url(#a)"/>
+  <rect class="box" x="794" y="360" width="162" height="62" rx="8"/>
+  <text class="h" x="808" y="382">5. Write, read back</text>
+  <text class="s" x="808" y="400">compare with the plan;</text>
+  <text class="s" x="808" y="414">mismatch is reported</text>
+  <path class="ln" d="M299 422V446C299 452 296 454 290 454H110C104 454 104 450 104 446V426" marker-end="url(#a)"/>
+  <text class="s" x="120" y="470">rejected: errors go back to the planner (round 2, 3...)</text>
+  <path class="ln" d="M875 422V492" marker-end="url(#a)"/>
+
+  <!-- data -->
+  <text class="band" x="24" y="508">LIVE DATA</text>
+  <rect class="data" x="24" y="518" width="210" height="46" rx="8"/><text class="t" x="129" y="546" text-anchor="middle">Todoist (tasks, calendar)</text>
+  <rect class="data" x="248" y="518" width="210" height="46" rx="8"/><text class="t" x="353" y="546" text-anchor="middle">Anki (flashcard collection)</text>
+  <rect class="data" x="472" y="518" width="210" height="46" rx="8"/><text class="t" x="577" y="546" text-anchor="middle">Spreadsheets, dashboards</text>
+  <rect class="data" x="696" y="518" width="260" height="46" rx="8"/><text class="t" x="826" y="546" text-anchor="middle">git: one commit per batch, no push</text>
+
+  <!-- watchers -->
+  <rect class="watch" x="24" y="584" width="932" height="40" rx="8"/>
+  <text class="t" x="40" y="609"><tspan font-weight="700">Watching every layer:</tspan> trace per run (stage, ms, tokens, cost) · JSON log per model call · regression tests · LLM-judge evals · privacy filter</text>
+</svg>
