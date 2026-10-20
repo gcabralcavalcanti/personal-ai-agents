@@ -6,7 +6,7 @@
     python demo.py --yes --no-open      # approve without asking, do not open a browser (scripts, CI)
     python demo.py --live               # call Claude for any answer not recorded yet (needs ANTHROPIC_API_KEY)
 
-With your own data (see "Use it with your own data" in the README):
+With your own data (see "Using it with your own data" in docs/how-it-works.md):
     python demo.py habits --input "Loop Habits Backup.db"        # or the CSV export .zip
     python demo.py goals --input <export> --goals my_goals.json
     python demo.py career --sources my_sources.csv --profile my_profile.json --live

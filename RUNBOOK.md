@@ -13,7 +13,7 @@
 | Run all tests | `python -m unittest discover -s tests` |
 | All agents' demo pages (no key) | `python demo.py` → `output/index.html` · `--no-open` keeps the browser closed |
 | One agent | `python demo.py secretary` (or `habits`, `goals`, `career`, `study`) · `--yes` approves the calendar write without asking · `--live` calls Claude for answers not recorded yet |
-| Your own data | `--input` (habit export or backup), `--goals`, `--sources`, `--profile`, `--board`, `--request`, `--week`; formats in the README, "Using it with your own data" |
+| Your own data | `--input` (habit export or backup), `--goals`, `--sources`, `--profile`, `--board`, `--request`, `--week`; formats in [docs/how-it-works.md](docs/how-it-works.md#using-it-with-your-own-data) |
 | Read Todoist into a board (read-only, needs `TODOIST_API_TOKEN`) | `python personal_ai_agents/todoist_gate/todoist_export.py --days 3 > my_board.json` |
 | Read the Anki review forecast (read-only, Anki open with AnkiConnect) | `python personal_ai_agents/study/anki_forecast.py "Deck A" > forecast.json` |
 | Show the last run's trace | `python personal_ai_agents/tracing/view.py --last` · HTML: add `--html trace.html` |
