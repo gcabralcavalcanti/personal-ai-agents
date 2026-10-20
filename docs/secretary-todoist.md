@@ -30,7 +30,7 @@ Other agents that need to write tasks (career, librarian) go through the same ga
 Production: 73 backtest cases (each reproduces a historical error class) plus 412 scripted checks in 10 more
 suites, run by a single `verify_all` script before any change is committed (all 485 passing on 18 Oct 2026).
 This repo: `tests/test_gate_hook.py` (runs the hook exactly as the harness does: JSON on stdin, exit code)
-and `tests/test_check_batch.py` (golden cases on fictitious batches).
+and `tests/test_check_batch.py` (reference cases on fictitious batches).
 
 ## Example (fictitious)
 Request: "move the weekly report to Thursday". The first proposal (`data/batch_blocked.json`) fails:

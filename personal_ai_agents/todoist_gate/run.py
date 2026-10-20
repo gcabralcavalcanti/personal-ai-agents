@@ -23,8 +23,13 @@ MAX_ROUNDS = 3
 
 
 def hook(call: dict, flags: str) -> tuple[int, str]:
-    p = subprocess.run([sys.executable, str(HOOK)], input=json.dumps(call), capture_output=True, text=True,
-                       env=dict(os.environ, GATE_FLAGS_DIR=flags))  # fmt: skip
+    p = subprocess.run(
+        [sys.executable, str(HOOK)],
+        input=json.dumps(call),
+        capture_output=True,
+        text=True,
+        env=dict(os.environ, GATE_FLAGS_DIR=flags),
+    )
     return p.returncode, p.stderr.strip()
 
 
@@ -45,8 +50,10 @@ def run(board: dict, llm: LLM, approve: Callable[[], bool], say: Callable[[str, 
     say("Request", f'"{board["request"]}"\n(fictitious board: {board["today"]}, now {board["now"]})')
 
     with tr.step("hook: write before any batch") as s:
-        first = {"tool_name": "mcp__todoist__reschedule-tasks",
-                 "tool_input": {"tasks": [{"id": "t2", "dueString": "Mar 12 at 09:00"}]}}  # fmt: skip
+        first = {
+            "tool_name": "mcp__todoist__reschedule-tasks",
+            "tool_input": {"tasks": [{"id": "t2", "dueString": "Mar 12 at 09:00"}]},
+        }
         code, msg = hook(first, flags)
         s["status"], s["detail"] = ("blocked", msg[:120]) if code == 2 else ("ok", "passed")
     out["first_try"] = {"call": first, "exit": code, "message": msg}

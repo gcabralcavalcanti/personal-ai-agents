@@ -14,8 +14,9 @@ the safety rules that keep them from doing damage.
 | 35 real openings from public job boards sorted for an example candidate: 16 settled by simple rules with no AI call, 19 read by Claude, for about US$ 0.003; four fictitious openings that state their graduation dates show all three outcomes (apply, monitor, discard) | [`output/career.html`](output/career.html) · [`output/triage_report.md`](output/triage_report.md) |
 | 11 of 12 test requests handled the way the career agent's rules say; the grader also rejects the two wrong answers planted to check it | [`output/evals/scoreboard.csv`](output/evals/scoreboard.csv) · [`output/evals/last-run.md`](output/evals/last-run.md) |
 | Goals scored from the data, next to how they feel: one goal feels like 4/10 and measures 8/10 | [`output/goals.html`](output/goals.html) |
+| Flashcards meet the calendar: the review forecast finds three decks with no study block; a first plan that drops every new block at 21:00 is refused by the checker, the plan that uses the free slots passes, and the batch waits for approval | `python demo.py study` · [screenshot](docs/demo-study.png) |
 
-![The four agents' pages](docs/demo-index.png)
+![The agents' pages](docs/demo-index.png)
 
 ## Run it
 
@@ -26,7 +27,7 @@ python demo.py
 
 Runs without an API key, replaying recorded answers. Set `ANTHROPIC_API_KEY` to call Claude live (add `--live`).
 It writes one page per agent to `output/` and opens the index. `python demo.py secretary` (or `habits`, `goals`,
-`career`) runs one agent; the calendar agent asks before writing, and `--yes` approves without asking.
+`career`, `study`) runs one agent; the calendar agents ask before writing, and `--yes` approves without asking.
 
 ## How it works
 
@@ -39,6 +40,7 @@ their own are here, with fictitious data.
 | **Habits** | turns the phone app's export into a spreadsheet and a dashboard (14, 30 and 90 days) | Loop Habits |
 | **Goals** | scores each key result from where it lives (habit app, task manager, a file that exists or not) and shows it next to how the goal feels | Todoist, Loop Habits |
 | **Career** | reads public job boards, keeps only what changed since last week, and sorts new openings into apply, monitor or discard | public job boards, Claude API |
+| **Study blocks** | turns how many flashcards fall due in each deck into study blocks on the calendar: every deck gets one block that opens it, sized by the forecast, written through the same checker and hook | Anki, Todoist |
 | Librarian | turns study material into flashcards with the same safety rules; lives in its own repository, [anki-librarian-mcp](https://github.com/gcabralcavalcanti/anki-librarian-mcp) | Anki |
 | Optimizer | audits the other agents' folders and keeps a list of problems that closes itself when they are fixed | git |
 
@@ -56,9 +58,9 @@ Operations and troubleshooting: [`RUNBOOK.md`](RUNBOOK.md).
 
 ## Data
 
-- Calendar, habits and goals: **fictitious**, written for the demo ([`data/`](data/)). The habit export is
+- Calendar, habits, goals and the flashcard week: **fictitious**, written for the demo ([`data/`](data/)). The habit export is
   generated in the same format the Loop Habits app writes.
-- Career: **real public job-board titles** from 19 Oct 2026
+- Career: **real public job-board titles**, saved on 19 Oct 2026
   ([`data/job_board_snapshot.json`](data/job_board_snapshot.json)), four fictitious openings marked as such
   ([`data/example_openings.json`](data/example_openings.json)), and an example candidate profile.
 - Claude's answers for the demo are stored in [`data/recorded/`](data/recorded/) so every run can be replayed.
@@ -81,8 +83,26 @@ repository.
 
 ## Using it with your own data
 
-I run these agents every day on my real calendar, habits and goals, which stay private. If you want to adapt one
-to your own tools, open an issue and I can help.
+Every agent takes your own file in place of the fictitious one. Nothing below writes anywhere except `output/`.
+
+| Agent | What you need | Command |
+|---|---|---|
+| Habits | the Loop Habits app on your phone, in its settings: export as CSV (a `.zip`) or full backup (a `.db`); copy the file to the computer | `python demo.py habits --input "Loop Habits CSV.zip"` |
+| Goals | the same export, plus a goals file in the format of [`data/goals.json`](data/goals.json): each key result is a file that exists or not, a habit (its name as in the app and a target share of days) or a count you copy from the task manager | `python demo.py goals --input <export> --goals my_goals.json` |
+| Career | a list of public career pages in the format of [`data/sources.csv`](data/sources.csv) (`area;company;link`) and your criteria in the format of [`data/triage_profile.json`](data/triage_profile.json); reading Claude's answers needs `ANTHROPIC_API_KEY` in `.env` | `python demo.py career --sources my_sources.csv --profile my_profile.json --live` |
+| Secretary | a task board in the format of [`data/demo_board.json`](data/demo_board.json), written by hand or read from Todoist (below) | `python demo.py secretary --board my_board.json --request "move the review to Thursday" --live` |
+| Study blocks | a week in the format of [`data/study_week.json`](data/study_week.json); its `forecast` can come from your Anki (below) | `python demo.py study --week my_week.json` |
+
+**Reading Todoist.** Put a personal token (Todoist: *Settings > Integrations > Developer*) in `.env` as
+`TODOIST_API_TOKEN`, then `python personal_ai_agents/todoist_gate/todoist_export.py --days 3 > my_board.json`.
+The script only reads. The demo writes only to a fake board; writing to a real Todoist goes through Claude Code's
+Todoist connector, and the same hook refuses every write until the checker closed the batch in the last 15 minutes
+([`RUNBOOK.md`](RUNBOOK.md) shows how to switch it on).
+
+**Reading Anki.** Open Anki with the AnkiConnect add-on (code `2055492159`), then
+`python personal_ai_agents/study/anki_forecast.py "Deck A" "Deck B" > forecast.json` and paste the list into your
+week file. It sends reading actions only. Start with a test deck; the flashcard writer lives in
+[anki-librarian-mcp](https://github.com/gcabralcavalcanti/anki-librarian-mcp).
 
 ## How AI was used
 

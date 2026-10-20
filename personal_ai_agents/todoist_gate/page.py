@@ -45,8 +45,10 @@ def _timeline(day: dict, board: dict) -> str:
         was = before.get(it["content"])
         kind = "new" if was is None else "moved" if was != (day["date"], it["start"]) else ""
         note = " · new" if kind == "new" else " · moved" if kind == "moved" else ""
-        blocks.append(f'<div class="b {kind}" style="top:{top:.0f}px;height:{height:.0f}px">{esc(it["start"])} '
-                      f"{esc(it['content'])}<small>{note}</small></div>")  # fmt: skip
+        blocks.append(
+            f'<div class="b {kind}" style="top:{top:.0f}px;height:{height:.0f}px">{esc(it["start"])} '
+            f"{esc(it['content'])}<small>{note}</small></div>"
+        )
     weekday = date.fromisoformat(day["date"]).strftime("%a")
     return f'<div class="panel"><b>{weekday} {esc(day["date"])}</b><div class="tl">{marks}{"".join(blocks)}</div></div>'
 
@@ -70,8 +72,10 @@ def page(r: dict) -> str:
             '<span class="badge ok">batch closed</span>' if rd["ok"] else '<span class="badge bad">batch open</span>'
         )
         summary, report = esc(rd["proposal"]["summary"]), esc(rd["report"])
-        parts.append(f'<div class="round {"ok" if rd["ok"] else "open"}"><b>Round {rd["round"]}</b> (sees {seen}) '
-                     f"{badge}<p class=muted>{summary}</p><pre>{report}</pre></div>")  # fmt: skip
+        parts.append(
+            f'<div class="round {"ok" if rd["ok"] else "open"}"><b>Round {rd["round"]}</b> (sees {seen}) '
+            f"{badge}<p class=muted>{summary}</p><pre>{report}</pre></div>"
+        )
     if r["closed"]:
         parts.append("<h2>3 · The validated plan</h2>")
         days = sorted(r["closed"]["days"], key=lambda d: d["date"])
@@ -83,12 +87,16 @@ def page(r: dict) -> str:
                 f'</td><td><span class="badge ok">exit {res[0]}: passed</span></td></tr>'
                 for c, res in zip(r["calls"], r["hook_results"], strict=True)
             )
-            parts.append(f'<div class="panel"><p>Approved. The same hook now lets the exact calls through; '
-                         f"{r['written']} task(s) written to the fake board.</p><table><tr><th>Call</th>"
-                         f"<th>Tasks</th><th>Hook</th></tr>{rows}</table></div>")  # fmt: skip
+            parts.append(
+                f'<div class="panel"><p>Approved. The same hook now lets the exact calls through; '
+                f"{r['written']} task(s) written to the fake board.</p><table><tr><th>Call</th>"
+                f"<th>Tasks</th><th>Hook</th></tr>{rows}</table></div>"
+            )
         else:
-            parts.append('<div class="panel"><span class="badge warn">waiting for approval</span> Nothing written. '
-                         "Run <code>python demo.py secretary --yes</code> to approve.</div>")  # fmt: skip
+            parts.append(
+                '<div class="panel"><span class="badge warn">waiting for approval</span> Nothing written. '
+                "Run <code>python demo.py secretary --yes</code> to approve.</div>"
+            )
     trace = view.table_html(r["trace"])
     parts.append(f'<h2>Trace of this run</h2><div class="panel" style="overflow-x:auto">{trace}</div>')
     lead = (

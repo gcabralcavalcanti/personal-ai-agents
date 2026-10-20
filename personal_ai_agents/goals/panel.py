@@ -18,8 +18,13 @@ def measure(kr: dict, marks: dict, end: date, start: date) -> dict:
     """Base (first 4 weeks), current value (last 4 weeks), target and status for one key result."""
     if kr["source"] == "artifact":
         status = "ok" if kr["done"] else "warn"
-        return {"base": "", "now": "done" if kr["done"] else kr.get("progress", "not yet"), "target": "exists",
-                "ratio": 1.0 if kr["done"] else 0.0, "status": status}  # fmt: skip
+        return {
+            "base": "",
+            "now": "done" if kr["done"] else kr.get("progress", "not yet"),
+            "target": "exists",
+            "ratio": 1.0 if kr["done"] else 0.0,
+            "status": status,
+        }
     if kr["source"] == "task manager":
         ratio = kr["count"] / kr["target"]
         elapsed = max(0.05, min(1.0, (end - start).days / 92))
@@ -58,8 +63,10 @@ def page(goals: dict, results: list[dict], end: date) -> str:
         gap = o["measured"] - o["felt"]
         note = ""
         if abs(gap) >= 3:
-            note = (f'<p class="warn" style="margin:8px 0 0">The data says {"better" if gap > 0 else "worse"} than it '
-                    f"feels ({o['felt']}/10 felt, {o['measured']}/10 measured).</p>")  # fmt: skip
+            note = (
+                f'<p class="warn" style="margin:8px 0 0">The data says {"better" if gap > 0 else "worse"} than it '
+                f"feels ({o['felt']}/10 felt, {o['measured']}/10 measured).</p>"
+            )
         rows = "".join(
             f"<tr><td>{esc(k['text'])}<br><small>[{esc(k['source'])}]</small></td><td class=n>{esc(k['base'])}</td>"
             f"<td class=n><b>{esc(k['now'])}</b></td><td class=n>{esc(k['target'])}</td>"

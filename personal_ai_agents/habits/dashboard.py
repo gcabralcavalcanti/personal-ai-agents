@@ -30,8 +30,15 @@ def summary(habits: list[dict], marks: dict, end: date) -> list[dict]:
     for h in habits:
         m = marks[h["Name"]]
         rates = {w: loop.rate(m, end, w) for w in WINDOWS}
-        rows.append({"name": h["Name"], "color": h["Color"], **{f"r{w}": rates[w] for w in WINDOWS},
-                     "streak": loop.streak(m, end), "weekly": loop.weekly(m, end)})  # fmt: skip
+        rows.append(
+            {
+                "name": h["Name"],
+                "color": h["Color"],
+                **{f"r{w}": rates[w] for w in WINDOWS},
+                "streak": loop.streak(m, end),
+                "weekly": loop.weekly(m, end),
+            }
+        )
     return rows
 
 
@@ -104,15 +111,18 @@ def page(rows: list[dict], marks: dict, end: date, source: str, sheet: str) -> s
         (max(r["streak"] for r in rows), "best current streak (days)"),
         (sum(1 for r in rows if light(r["r30"]) == "ok"), f"habits at or above {GOOD:.0%}"),
     ]
-    tiles_html = "".join(f'<div class="panel tile"><div class="v">{v}</div><div class="l">{esc(lbl)}</div></div>'
-                         for v, lbl in tiles)  # fmt: skip
+    tiles_html = "".join(
+        f'<div class="panel tile"><div class="v">{v}</div><div class="l">{esc(lbl)}</div></div>' for v, lbl in tiles
+    )
     trs = []
     for r in rows:
         cells = "".join(
             f'<td class="n"><span class="badge {light(r[f"r{w}"])}">{pct(r[f"r{w}"])}</span></td>' for w in WINDOWS
         )
-        trs.append(f"<tr><td><b>{esc(r['name'])}</b></td>{cells}<td class=n>{r['streak']}</td>"
-                   f"<td>{_spark(r['weekly'])}</td><td>{_heat(marks[r['name']], end)}</td></tr>")  # fmt: skip
+        trs.append(
+            f"<tr><td><b>{esc(r['name'])}</b></td>{cells}<td class=n>{r['streak']}</td>"
+            f"<td>{_spark(r['weekly'])}</td><td>{_heat(marks[r['name']], end)}</td></tr>"
+        )
     table = (
         '<div class="panel" style="overflow-x:auto"><table><tr><th>Habit</th><th class=n>14 d</th><th class=n>30 d</th>'
         "<th class=n>90 d</th><th class=n>Streak</th><th>Last 13 weeks</th><th>Day by day</th></tr>"

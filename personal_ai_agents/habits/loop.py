@@ -42,8 +42,22 @@ def write_fictitious_export(path: Path, end: date, days: int = 120, seed: int = 
             p = finish + (start - finish) * i / (days - 1)  # i = 0 is the newest day
             r = rng.random()
             marks[(name, d)] = "UNKNOWN" if r > 0.97 else ("YES_MANUAL" if rng.random() < p else "NO")
-    habits = [["Position", "Name", "Type", "Question", "Description", "FrequencyNumerator", "FrequencyDenominator",
-               "Color", "Unit", "Target Type", "Target Value", "Archived?"]]  # fmt: skip
+    habits = [
+        [
+            "Position",
+            "Name",
+            "Type",
+            "Question",
+            "Description",
+            "FrequencyNumerator",
+            "FrequencyDenominator",
+            "Color",
+            "Unit",
+            "Target Type",
+            "Target Value",
+            "Archived?",
+        ]
+    ]
     for i, (name, question, _, _) in enumerate(FICTITIOUS, 1):
         habits.append([f"{i:03d}", name, "YES_NO", question, "", 1, 1, COLORS[i - 1], "", "", "", "false"])
     root = [["Date"] + [h[0] for h in FICTITIOUS] + [""]]
@@ -92,3 +106,51 @@ def streak(marks: dict[date, str], end: date) -> int:
 def weekly(marks: dict[date, str], end: date, weeks: int = 13) -> list[float | None]:
     """Completion rate per week, oldest first."""
     return [rate(marks, end - timedelta(days=7 * w), 7) for w in reversed(range(weeks))]
+
+
+def read_backup(path: Path) -> tuple[list[dict], dict[str, dict[date, str]]]:
+    """Read the app's full backup (Settings > Backup in Loop Habits: a SQLite .db) into the same shape.
+
+    Repetitions store one row per marked day: timestamp = midnight UTC in ms; value -1 unknown, 0 no, 3 skip;
+    yes/no habits: 2 manual yes, 1 automatic yes; measurable habits: the value x 1000, compared with the target.
+    """
+    import sqlite3
+    from datetime import datetime, timezone
+
+    con = sqlite3.connect(f"file:{Path(path).as_posix()}?mode=ro", uri=True)
+    rows = con.execute(
+        "select id, name, type, archived, question, target_type, target_value from Habits order by position, id"
+    ).fetchall()
+    reps = con.execute("select habit, timestamp, value from Repetitions").fetchall()
+    con.close()
+    habits = [
+        {"Name": r[1], "Question": r[4] or "", "Color": "", "Archived?": "true" if r[3] else "false"}
+        for r in rows
+        if not r[3]
+    ]
+    info = {r[0]: r for r in rows if not r[3]}
+    marks: dict[str, dict[date, str]] = {h["Name"]: {} for h in habits}
+    for hid, ts, v in reps:
+        if hid not in info or v == -1:
+            continue
+        _, name, kind, _, _, target_type, target = info[hid]
+        day = datetime.fromtimestamp(ts / 1000, timezone.utc).date()
+        if v == 0:
+            marks[name][day] = "NO"
+        elif v == 3:
+            marks[name][day] = "SKIP"
+        elif kind == 0:
+            marks[name][day] = {2: "YES_MANUAL", 1: "YES_AUTO"}.get(v, "UNKNOWN")
+        else:
+            reached = v / 1000 <= target if target_type == 1 else v / 1000 >= target
+            marks[name][day] = "YES_MANUAL" if reached else "NO"
+    return habits, marks
+
+
+def read_any(path: Path) -> tuple[list[dict], dict[str, dict[date, str]]]:
+    """The CSV export (.zip) or the full backup (.db), whichever the app gave you."""
+    return read_backup(path) if Path(path).suffix.lower() == ".db" else read_export(path)
+
+
+def last_day(marks: dict[str, dict[date, str]]) -> date:
+    return max((d for m in marks.values() for d in m), default=date.today())

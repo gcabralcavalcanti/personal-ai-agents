@@ -22,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 class Trace:
     def __init__(self, name: str, llm=None, root: Path | None = None):
         self.llm = llm
-        self.run_id = f"{name}-{datetime.now():%Y%m%d-%H%M%S}"
+        self.run_id = f"{name}-{datetime.now():%Y%m%d-%H%M%S-%f}"  # microseconds: two runs never share a file
         self.dir = Path(root or ROOT / "output" / "runs") / self.run_id
         self.dir.mkdir(parents=True, exist_ok=True)
         self.path = self.dir / "trace.jsonl"

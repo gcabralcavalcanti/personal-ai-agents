@@ -39,7 +39,7 @@ Three automated pieces in this repository:
 - Tasks go through the Secretary's validation gate, after the human's ok.
 
 ## Tests and evals
-- **Request cases** (`tests/golden/career_cases.json`, 12 fictitious cases mirroring the production golden set): each has
+- **Request cases** (`tests/golden/career_cases.json`, 12 fictitious cases mirroring the reference cases of the private version): each has
   a request, a context, the accepted modes and the expected behaviours. The agent model answers from the skill
   (`personal_ai_agents/agent_evals/career_skill.md`) in a fixed JSON shape; code checks the mode; a separate judge call grades each
   behaviour without seeing the skill. Two **negative controls** (wrong answers) must be failed by the judge, or

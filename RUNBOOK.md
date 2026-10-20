@@ -4,14 +4,18 @@
 1. Python 3.10+. `pip install -r requirements.txt`.
 2. `cp .env.example .env` and fill only what you use. Only the triage and the live evals need `ANTHROPIC_API_KEY`;
    without it they replay recorded answers (demo mode). Never commit `.env`.
-3. To activate the hook in Claude Code: copy `.claude/settings.example.json` to `.claude/settings.json`.
+3. To switch on the hook (the check Claude Code runs before every Todoist write) copy
+   `.claude/settings.example.json` to `.claude/settings.json`.
 
 ## Routine operations
 | Task | Command |
 |---|---|
 | Run all tests | `python -m unittest discover -s tests` |
 | All agents' demo pages (no key) | `python demo.py` → `output/index.html` · `--no-open` keeps the browser closed |
-| One agent | `python demo.py secretary` (or `habits`, `goals`, `career`) · `--yes` approves the calendar write without asking · `--live` calls Claude for answers not recorded yet |
+| One agent | `python demo.py secretary` (or `habits`, `goals`, `career`, `study`) · `--yes` approves the calendar write without asking · `--live` calls Claude for answers not recorded yet |
+| Your own data | `--input` (habit export or backup), `--goals`, `--sources`, `--profile`, `--board`, `--request`, `--week`; formats in the README, "Using it with your own data" |
+| Read Todoist into a board (read-only, needs `TODOIST_API_TOKEN`) | `python personal_ai_agents/todoist_gate/todoist_export.py --days 3 > my_board.json` |
+| Read the Anki review forecast (read-only, Anki open with AnkiConnect) | `python personal_ai_agents/study/anki_forecast.py "Deck A" > forecast.json` |
 | Show the last run's trace | `python personal_ai_agents/tracing/view.py --last` · HTML: add `--html trace.html` |
 | Validate a Todoist batch (opens the gate on success) | `python personal_ai_agents/todoist_gate/check_batch.py <batch.json>` |
 | Validate without opening the gate | add `--no-gate` |
@@ -59,5 +63,8 @@
 | `no recorded answer` / `NoRecording` | a prompt, the board or the cases changed since the recording | run that piece with `--live` and a key, or undo the change |
 | Calendar page says "waiting for approval" | the run had no keyboard and no `--yes` | `python demo.py secretary --yes` |
 | Habits page empty or missing | the export file was deleted | it is regenerated on the next run (`data/loop-habits-export.zip`, fictitious) |
+| Study page lists a deck as "too few cards" | under 5 minutes of review a day | intended: no block is proposed; give it one by hand if you want it opened |
+| `no deck named ...` from `anki_forecast.py` | deck name typed differently from Anki | copy the full name, with `::` for subdecks |
+| `Set TODOIST_API_TOKEN` | no token in the environment or `.env` | add it to `.env`; an empty value counts as no token |
 | A page did not open | `--no-open`, or no default browser | open `output/index.html` by hand |
 

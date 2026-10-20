@@ -115,7 +115,7 @@ fulfilled the request (`request_fulfilled`), and an unfulfilled request goes to 
 | LLM beyond chat (API, structured output, pipeline) | `personal_ai_agents/llm/client.py`, `personal_ai_agents/career/triage.py`, `personal_ai_agents/agent_evals/run_evals.py` |
 | Tool use with schemas and validation | `personal_ai_agents/schemas/*.json` + `jsonschema`; `check_batch.py` gating MCP calls |
 | Guardrails and policies | `gate_hook.py`, triage business rules, blocked sources in `job_delta.py`, the Anki write lock |
-| Evals / golden sets | request cases + LLM judge + negative controls + scoreboard; golden batches; snapshot tests |
+| Evals / reference cases | request cases + LLM judge + negative controls + scoreboard; reference batches; output-comparison tests |
 | Logging / traceability | trace.jsonl per run + viewer; JSON log per call; generated delta and triage reports; queue with "since" dates |
 | Retries, timeouts, idempotency | client backoff and timeout; delta state and per-opening verdicts (second run = 0 calls) |
 | Git with README and runbook | this repo; `RUNBOOK.md`; each agent's `CLAUDE.md` is its runbook |

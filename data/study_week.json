@@ -1,0 +1,29 @@
+{
+  "_comment": "Fictitious. The flashcard forecast (cards due per deck for the next 7 days, as the Anki side reports it) and the week in the task manager. Study blocks declare the deck they open on a 'deck:' line; production blocks say 'deck: -'.",
+  "start": "2026-03-09",
+  "now": "07:00",
+  "seconds_per_review": 8,
+  "seconds_per_new": 25,
+  "window": ["07:00", "22:30"],
+  "budget_hours": 13,
+  "sleep_start": "23:00",
+  "forecast": [
+    {"deck": "Statistics", "due": [35, 20, 28, 40, 80, 22, 30], "new_per_day": 30},
+    {"deck": "Languages::Spanish", "due": [60, 45, 50, 55, 40, 30, 65], "new_per_day": 15},
+    {"deck": "Business::Metrics", "due": [24, 18, 30, 20, 16, 22, 28], "new_per_day": 8},
+    {"deck": "History", "due": [45, 50, 40, 38, 48, 42, 46], "new_per_day": 0},
+    {"deck": "Biology", "due": [3, 0, 2, 4, 1, 0, 2], "new_per_day": 0}
+  ],
+  "fixed": [
+    {"content": "Lectures", "days": [0, 1, 2, 3], "start": "08:00", "duration_min": 240, "deck": "-"},
+    {"content": "Internship", "days": [0, 1, 2, 3, 4], "start": "13:00", "duration_min": 300, "deck": "-"},
+    {"content": "Gym", "days": [0, 2, 4], "start": "18:30", "duration_min": 60, "deck": "-"},
+    {"content": "Dinner", "days": [0, 1, 2, 3, 4, 5, 6], "start": "19:45", "duration_min": 45, "deck": "-"},
+    {"content": "Thesis writing", "days": [5], "start": "09:00", "duration_min": 180, "deck": "-"},
+    {"content": "Family lunch", "days": [6], "start": "12:00", "duration_min": 150, "deck": "-"},
+    {"content": "Cards: Statistics", "days": [0, 2, 4], "start": "07:20", "duration_min": 20, "deck": "Statistics"},
+    {"content": "Language practice", "days": [0, 1, 2, 3, 4, 5, 6], "start": "21:00", "duration_min": 30, "deck": "Languages::Spanish"},
+    {"content": "Cards: Economics", "days": [5], "start": "16:00", "duration_min": 20, "deck": "Economics"},
+    {"content": "Review cards", "days": [1, 3], "start": "07:20", "duration_min": 15}
+  ]
+}

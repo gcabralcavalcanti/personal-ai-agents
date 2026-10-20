@@ -14,6 +14,11 @@ AGENTS = [
     ("habits", "Habits", "Turns the habit-tracker export into a spreadsheet and a dashboard of habits."),
     ("goals", "Goals", "Shows the quarter's goals and key results against what the data says."),
     ("career", "Career", "Reads public job boards and sorts new openings into apply, monitor or discard."),
+    (
+        "study",
+        "Study blocks",
+        "Turns the flashcard review forecast into study blocks the calendar can take, through the same gate.",
+    ),
 ]
 
 LIBRARIAN_URL = "https://github.com/gcabralcavalcanti/anki-librarian-mcp"

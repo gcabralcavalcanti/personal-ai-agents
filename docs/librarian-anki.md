@@ -45,7 +45,7 @@ created note back to confirm fields, tags and deck.
 | Unknown actions are blocked (allowlist, not denylist) | client lock |
 | Resetting a card only through one script, only for cards with 5 reviews or fewer | conditional action with its own criterion |
 | The red flag ("this card is wrong") is the human's: the agent reads it, never writes it, never overwrites a flag it did not set | flag routine reads before and after |
-| A tag update rewrites the whole list: re-read the note immediately before writing, never write from a snapshot | client + importer |
+| A tag update rewrites the whole list: re-read the note immediately before writing, never write from an old copy | client + importer |
 | Duplicates blocked collection-wide; "same front, different back" goes to the human | reconciliation |
 | The source is the project folder; Anki is derived from it, never the other way round | pipeline order |
 

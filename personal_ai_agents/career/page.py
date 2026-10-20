@@ -31,8 +31,9 @@ def page(store: dict, counts: dict, summary: dict, profile: dict, snapshot_date:
         (counts["by_model"], "decided by the model"),
         (summary["api_calls"], "model calls in this run (recorded answers replayed)"),
     ]
-    tiles_html = "".join(f'<div class="panel tile"><div class="v">{v}</div><div class="l">{esc(lbl)}</div></div>'
-                         for v, lbl in tiles)  # fmt: skip
+    tiles_html = "".join(
+        f'<div class="panel tile"><div class="v">{v}</div><div class="l">{esc(lbl)}</div></div>' for v, lbl in tiles
+    )
     buttons = '<button data-f="all" class="on">All</button>' + "".join(
         f'<button data-f="{d}">{d.title()} ({by[d]})</button>' for d in ORDER
     )
@@ -43,11 +44,13 @@ def page(store: dict, counts: dict, summary: dict, profile: dict, snapshot_date:
         f"<td>{esc(r.get('reason', ''))}<br><small>decided by {esc(r.get('decided_by', ''))}</small></td></tr>"
         for r in rows
     )
-    table = (f'<div class="panel" style="overflow-x:auto"><div class="filters">{buttons}</div><table><tr><th></th>'
-             f"<th>Company</th><th>Opening</th><th>Place</th><th>Why</th></tr>{trs}</table></div>")  # fmt: skip
+    table = (
+        f'<div class="panel" style="overflow-x:auto"><div class="filters">{buttons}</div><table><tr><th></th>'
+        f"<th>Company</th><th>Opening</th><th>Place</th><th>Why</th></tr>{trs}</table></div>"
+    )
     geo = profile["geography"]
     lead = (
-        f"New openings on public job boards (snapshot of {esc(snapshot_date)}) plus four fictitious ones that state "
+        f"New openings on public job boards (saved on {esc(snapshot_date)}) plus four fictitious ones that state "
         "their graduation dates (marked as such), sorted for an example candidate: "
         f"{esc(profile['candidate'])}; preferred city {esc(', '.join(geo['preferred']))}; also "
         f"{esc(', '.join(geo['acceptable']))}. Code discards senior and mid-level titles without calling the model; "

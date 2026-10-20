@@ -139,7 +139,7 @@ class DemoWithoutKeyboard(unittest.TestCase):
         stdin = sys.stdin
         sys.stdin = Tty("")
         try:
-            self.assertFalse(demo.approve_from([])())
+            self.assertFalse(demo.approve_from(False)())
         finally:
             sys.stdin = stdin
 

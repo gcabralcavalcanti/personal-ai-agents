@@ -22,9 +22,9 @@ phone app backup (SQLite) -> converter -> spreadsheet (the database) -> HTML das
   allowlist of habit IDs + a denylist audit of the rendered HTML; one hit aborts and nothing is written.
 
 ## Tests
-- **A/B snapshot test**: runs the real scripts on frozen inputs with an injected date in a temp copy and
-  compares every output with a stored snapshot. Intentional output changes require regenerating the
-  snapshot and saying why in the commit.
+- **A/B output test**: runs the real scripts on frozen inputs with an injected date in a temp copy and
+  compares every output with a stored copy. Intentional output changes require regenerating the
+  stored copy and saying why in the commit.
 - Backup-vs-CSV equivalence test: the new SQLite path must produce cell-by-cell the same spreadsheet as the
   old CSV path for the same day.
 - This repo: `tests/test_public_filter.py`.
