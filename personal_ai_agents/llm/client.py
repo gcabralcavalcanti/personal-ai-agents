@@ -31,8 +31,8 @@ class NoRecording(RuntimeError):
 
 
 def load_key(root: Path = config.ROOT) -> str | None:
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        return os.environ["ANTHROPIC_API_KEY"]
+    if "ANTHROPIC_API_KEY" in os.environ:  # set, even empty, wins: empty means demo mode, no other lookup
+        return os.environ["ANTHROPIC_API_KEY"] or None
     env_file = root / ".env"
     if env_file.exists():
         for line in env_file.read_text(encoding="utf-8").splitlines():

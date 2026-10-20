@@ -1,0 +1,6 @@
+# Binary files: never diffed or re-encoded
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary
+*.xlsx binary

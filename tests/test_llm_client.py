@@ -88,5 +88,22 @@ class LLMClient(unittest.TestCase):
         self.assertAlmostEqual(llm.cost_usd(), (100 * 0.10 + 10 * 0.50) / 1e6)
 
 
+class EmptyKey(unittest.TestCase):
+    def test_empty_key_means_demo_mode_without_any_other_lookup(self):
+        import os
+        import sys
+        import tempfile
+        import types
+        from pathlib import Path
+        from unittest import mock
+
+        folder = Path(tempfile.mkdtemp())
+        (folder / ".env").write_text("ANTHROPIC_API_KEY=sk-from-dotenv\n", encoding="utf-8")
+        registry = types.SimpleNamespace(OpenKey=None, HKEY_CURRENT_USER=None, QueryValueEx=None)
+        with mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": ""}), mock.patch.dict(sys.modules, {"winreg": registry}):
+            self.assertIsNone(client_mod.load_key(folder))
+            self.assertEqual(LLM(mode="auto", recordings=folder / "r", log_dir=folder / "l").mode, "demo")
+
+
 if __name__ == "__main__":
     unittest.main()
