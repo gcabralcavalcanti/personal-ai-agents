@@ -3,6 +3,8 @@
 Small, runnable versions of the AI agents I use every day to run my calendar, habits, goals, study and job search,
 with the safety rules that keep them from doing damage.
 
+**[Live demo](https://gcabralcavalcanti.github.io/personal-ai-agents/)**: every agent, built from this repository on every push.
+
 ![Public excerpt of a private system](https://img.shields.io/badge/data-public%20excerpt%20of%20a%20private%20system-555)
 ![Built with AI assistance](https://img.shields.io/badge/built%20with-AI%20assistance-6b46c1)
 

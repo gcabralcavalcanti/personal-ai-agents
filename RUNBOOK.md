@@ -10,6 +10,7 @@
 ## Routine operations
 | Task | Command |
 |---|---|
+| Live demo on GitHub Pages | every push to main runs `.github/workflows/pages.yml` (no key) and publishes `output/*.html`; turn it on once in Settings > Pages > Source = GitHub Actions |
 | Run all tests | `python -m unittest discover -s tests` |
 | All agents' demo pages (no key) | `python demo.py` → `output/index.html` · `--no-open` keeps the browser closed |
 | One agent | `python demo.py secretary` (or `habits`, `goals`, `career`, `study`) · `--yes` approves the calendar write without asking · `--live` calls Claude for answers not recorded yet |
