@@ -19,6 +19,10 @@ with the safety rules that keep them from doing damage.
 - **Habits, goals and jobs from real formats.** The habit app's export becomes a dashboard, goals are scored from
   the data next to how they feel, and public job openings are sorted into apply, monitor or discard.
 
+**The method behind them.** I organise study and work in four kinds of session, A.F.A.M.: Architecting (build the
+material), Frameact (solve the problem), Anking (review in Anki) and Maintenance (keep a project running, no new
+features). The calendar and study agents plan the week around them; Maintenance is the newest and is being added now.
+
 ## Run it
 
 ```
