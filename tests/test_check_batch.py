@@ -10,7 +10,7 @@ import unittest
 
 from _path import EXAMPLES, SRC
 
-from todoist_gate.check_batch import check_batch
+from personal_ai_agents.todoist_gate.check_batch import check_batch
 
 with open(os.path.join(EXAMPLES, "batch_ok.json"), encoding="utf-8") as _f:
     OK = json.load(_f)

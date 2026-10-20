@@ -5,7 +5,7 @@ import unittest
 import _path  # noqa: F401
 from fake_llm import make_llm
 
-from career import triage as tr
+from personal_ai_agents.career import triage as tr
 
 PROFILE = {"candidate": "test", "graduation_windows": ["2027-12"], "geography": {"preferred": ["Rio de Janeiro"]}}
 URL = "https://boards.greenhouse.io/examplebank"

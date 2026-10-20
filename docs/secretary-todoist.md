@@ -33,7 +33,7 @@ This repo: `tests/test_gate_hook.py` (runs the hook exactly as the harness does:
 and `tests/test_check_batch.py` (golden cases on fictitious batches).
 
 ## Example (fictitious)
-Request: "move the weekly report to Thursday". The first proposal (`examples/batch_blocked.json`) fails:
+Request: "move the weekly report to Thursday". The first proposal (`data/batch_blocked.json`) fails:
 ```
 OPEN 2026-03-11  - OVERLAP: "Deep work: thesis chapter 2" (09:00) x "Weekly report" (10:30)
 GLOBAL BLOCKERS  - PAST_DIRTY: 1 overdue task(s) still on the board
@@ -41,12 +41,12 @@ GLOBAL BLOCKERS  - PAST_DIRTY: 1 overdue task(s) still on the board
                  - DEP_CROSSDAY: "Run regression" needs "Download dataset" first
 BATCH OPEN - do not write, do not report done.
 ```
-The corrected proposal (`examples/batch_ok.json`) closes the batch and opens the gate.
+The corrected proposal (`data/batch_ok.json`) closes the batch and opens the gate.
 
 ## Run it end to end
 `python demo.py` plays one request on a fictitious board: the hook blocks a write with no batch, the planner
 (Claude API, recorded answers) proposes, the validator rejects round 1 and closes round 2, the human approves,
 the hook lets the exact calls through, and every stage lands in a trace. The planner is
-`src/todoist_gate/planner.py`; in production that role is the Claude Code session itself.
+`personal_ai_agents/todoist_gate/planner.py`; in production that role is the Claude Code session itself.
 Why the hook exists: [case study](case-study-recurrence-gate.md).
 

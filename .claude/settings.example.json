@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/src/todoist_gate/gate_hook.py\"",
+            "command": "python \"$CLAUDE_PROJECT_DIR/personal_ai_agents/todoist_gate/gate_hook.py\"",
             "timeout": 10
           }
         ]

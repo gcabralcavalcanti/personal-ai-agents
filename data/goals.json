@@ -1,0 +1,41 @@
+{
+  "_comment": "Fictitious quarter. Key results are either an artifact (exists or not) or a series measured by a flow that already runs (the habit app, the task manager). A key result that would need a new manual counter is rewritten as an artifact.",
+  "quarter": "2026-Q4",
+  "start": "2026-10-01",
+  "end": "2026-12-31",
+  "objectives": [
+    {
+      "title": "Finish the thesis draft",
+      "felt": 4,
+      "key_results": [
+        {"text": "Chapter 2 draft saved in the project folder", "source": "artifact", "done": true},
+        {"text": "Chapter 3 draft saved in the project folder", "source": "artifact", "done": false},
+        {"text": "Focus block on at least 5 of 7 days", "source": "habit app", "habit": "Deep work block", "target": 0.71}
+      ]
+    },
+    {
+      "title": "Read more, and keep what I read",
+      "felt": 6,
+      "key_results": [
+        {"text": "Read 20 pages on at least 5 of 7 days", "source": "habit app", "habit": "Read 20 pages", "target": 0.71},
+        {"text": "Reading notes for 3 books", "source": "artifact", "done": false, "progress": "2 of 3"}
+      ]
+    },
+    {
+      "title": "Hold a conversation in the new language",
+      "felt": 7,
+      "key_results": [
+        {"text": "Practice on at least 4 of 7 days", "source": "habit app", "habit": "Language practice", "target": 0.57},
+        {"text": "12 tutor lessons completed", "source": "task manager", "count": 5, "target": 12}
+      ]
+    },
+    {
+      "title": "Sleep routine that holds",
+      "felt": 3,
+      "key_results": [
+        {"text": "No screens after 11 pm on at least 5 of 7 days", "source": "habit app", "habit": "No screens after 11 pm", "target": 0.71},
+        {"text": "Plan tomorrow every evening", "source": "habit app", "habit": "Plan tomorrow", "target": 0.85}
+      ]
+    }
+  ]
+}

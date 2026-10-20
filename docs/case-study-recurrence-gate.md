@@ -20,14 +20,14 @@ silent and expensive, "usually remembered" is not good enough. Instructions are 
 
 ## The fix: a deterministic gate
 When the agents moved to Claude Code (8 Oct 2026), R2 became a **PreToolUse hook**
-([`gate_hook.py`](../src/todoist_gate/gate_hook.py)). The harness runs it before every Todoist write, with the
+([`gate_hook.py`](../personal_ai_agents/todoist_gate/gate_hook.py)). The harness runs it before every Todoist write, with the
 tool call as JSON on stdin:
 
 ```
 update-tasks with a dueString  ->  exit 2, call blocked, and the model reads:
 "BLOCKED (R2): change dates with reschedule-tasks, never update-tasks with dueString
  (it rewrites the rule and kills the recurrence). If the human approved a schedule change,
- run python src/todoist_gate/release.py I7, retry, then release.py --close."
+ run python personal_ai_agents/todoist_gate/release.py I7, retry, then release.py --close."
 ```
 
 Three design choices:

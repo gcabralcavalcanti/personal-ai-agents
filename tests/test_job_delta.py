@@ -6,7 +6,7 @@ import unittest
 
 from _path import EXAMPLES
 
-from career import job_delta as jd
+from personal_ai_agents.career import job_delta as jd
 
 GH = {
     "jobs": [

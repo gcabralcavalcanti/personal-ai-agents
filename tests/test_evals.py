@@ -5,7 +5,7 @@ import unittest
 import _path  # noqa: F401
 from fake_llm import make_llm
 
-from agent_evals import run_evals as ev
+from personal_ai_agents.agent_evals import run_evals as ev
 
 CASE = {
     "id": "K04",

@@ -1,2 +1,3 @@
 anthropic>=1.15,<2
 jsonschema>=4
+openpyxl>=3.1

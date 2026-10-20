@@ -8,8 +8,8 @@ import anthropic
 import httpx2
 from fake_llm import make_llm
 
-from llm import client as client_mod
-from llm.client import LLM, BudgetExceeded, NoRecording
+from personal_ai_agents.llm import client as client_mod
+from personal_ai_agents.llm.client import LLM, BudgetExceeded, NoRecording
 
 SCHEMA = {"type": "object", "additionalProperties": False, "required": ["x"], "properties": {"x": {"type": "number"}}}
 

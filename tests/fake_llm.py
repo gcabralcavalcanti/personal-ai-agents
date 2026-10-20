@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 import _path  # noqa: F401
 
-from llm.client import LLM
+from personal_ai_agents.llm.client import LLM
 
 
 class FakeMessages:

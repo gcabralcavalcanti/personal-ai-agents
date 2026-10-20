@@ -8,7 +8,7 @@ from datetime import date
 
 from _path import EXAMPLES
 
-from optimizer import queue as q
+from personal_ai_agents.optimizer import queue as q
 
 
 class Queue(unittest.TestCase):

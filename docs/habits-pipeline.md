@@ -18,7 +18,7 @@ phone app backup (SQLite) -> converter -> spreadsheet (the database) -> HTML das
 ## Guardrails
 - Writes the spreadsheet only with the human's ok; read-only on the task manager.
 - Archived habits are retired automatically from the source flag, not from a manual list.
-- **Privacy by default** for the public version (`src/privacy/public_filter.py` shows the pattern):
+- **Privacy by default** for the public version (`personal_ai_agents/privacy/public_filter.py` shows the pattern):
   allowlist of habit IDs + a denylist audit of the rendered HTML; one hit aborts and nothing is written.
 
 ## Tests

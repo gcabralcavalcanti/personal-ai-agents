@@ -55,7 +55,7 @@ decks, media, suspension routine, collection-state generator. The public server 
 AnkiConnect (see anki-librarian-mcp).
 
 ## Example (fictitious)
-See `examples/anki_pipeline.md` (one run, stage by stage) and `examples/cards.tsv`.
+See `docs/anki-pipeline.md` (one run, stage by stage) and `data/cards.tsv`.
 ```
 propose_add_notes("Economics::Macro", 3 notes)
   -> plan p-13af82, pending: 2 to add · skipped as duplicate: 1 (note 1700000000000) · similar flagged: 1 (score 0.92)
@@ -65,4 +65,4 @@ apply_plan("p-13af82")
 propose_delete_notes([...])
   -> BLOCKED: deleteNotes is off. Turning it on is the human's decision (allow_delete = true in the config).
 ```
-Full transcript (fake Anki, real server process): `examples/demo_transcript.md` in anki-librarian-mcp.
+Full transcript (fake Anki, real server process): `output/demo_transcript.md` in anki-librarian-mcp.

@@ -64,17 +64,17 @@ flowchart LR
 ## Calling the model API
 
 Everything above runs inside Claude Code, but two pieces call the Claude API directly from Python, through one
-small client (`src/llm/client.py`):
+small client (`personal_ai_agents/llm/client.py`):
 
 | Concern | How |
 |---|---|
-| Structured output | the request carries a JSON Schema (`schemas/`); the answer is validated again with `jsonschema` |
+| Structured output | the request carries a JSON Schema (`personal_ai_agents/schemas/`); the answer is validated again with `jsonschema` |
 | Business rules | an optional `check` in code; a failing answer is sent back once with the complaints, then the run stops for that item |
 | Retries / timeout | exponential backoff with jitter on 429, 5xx and connection errors; 30 s per attempt |
 | Cost | cheapest model (Claude Haiku 5.5), `max_tokens` 600, effort `low`, a hard call cap per run |
-| Cache | every accepted answer is recorded (`recordings/`); an identical request is never paid twice |
+| Cache | every accepted answer is recorded (`data/recorded/`); an identical request is never paid twice |
 | Demo mode | without a key the recordings replay the run: tests and CI need no secret |
-| Observability | one JSON line per call in `logs/`; one `runs/<run>/trace.jsonl` per run with every stage (also for answers replayed from recordings: what they cost when recorded) |
+| Observability | one JSON line per call in `logs/`; one `output/runs/<run>/trace.jsonl` per run with every stage (also for answers replayed from recordings: what they cost when recorded) |
 | Secrets | `ANTHROPIC_API_KEY` from the environment or `.env` (git-ignored); never printed or logged |
 
 Measured on 19 Oct 2026: the triage of 35 real openings made 20 calls for US$ 0.003; an eval run (12 cases +
@@ -112,8 +112,8 @@ fulfilled the request (`request_fulfilled`), and an unfulfilled request goes to 
 | Requirement | Where it shows up here |
 |---|---|
 | Multi-step agents (planner / researcher / analyst / reviewer) | `demo.py`: planner -> validator -> human -> gate -> write; card pipeline harvest -> planner -> generator -> tags; eval agent -> judge |
-| LLM beyond chat (API, structured output, pipeline) | `src/llm/client.py`, `src/career/triage.py`, `src/agent_evals/run_evals.py` |
-| Tool use with schemas and validation | `schemas/*.json` + `jsonschema`; `check_batch.py` gating MCP calls |
+| LLM beyond chat (API, structured output, pipeline) | `personal_ai_agents/llm/client.py`, `personal_ai_agents/career/triage.py`, `personal_ai_agents/agent_evals/run_evals.py` |
+| Tool use with schemas and validation | `personal_ai_agents/schemas/*.json` + `jsonschema`; `check_batch.py` gating MCP calls |
 | Guardrails and policies | `gate_hook.py`, triage business rules, blocked sources in `job_delta.py`, the Anki write lock |
 | Evals / golden sets | request cases + LLM judge + negative controls + scoreboard; golden batches; snapshot tests |
 | Logging / traceability | trace.jsonl per run + viewer; JSON log per call; generated delta and triage reports; queue with "since" dates |

@@ -19,15 +19,15 @@ One skill that reads the request and picks a mode:
 
 Three automated pieces in this repository:
 
-1. **Job-board delta** (`src/career/job_delta.py`): reads a list of public career pages, extracts entry-level
+1. **Job-board delta** (`personal_ai_agents/career/job_delta.py`): reads a list of public career pages, extracts entry-level
    titles (public Greenhouse API, or a text pattern on other pages) and reports only the **delta** since the last
    run. Idempotent: a second run with no change reports "unchanged".
-2. **LLM triage** (`src/career/triage.py`): every new opening gets a structured verdict from the Claude API
-   (`schemas/triage_verdict.json`): apply / monitor / discard, graduation fit, geography, preparation cost and a
+2. **LLM triage** (`personal_ai_agents/career/triage.py`): every new opening gets a structured verdict from the Claude API
+   (`personal_ai_agents/schemas/triage_verdict.json`): apply / monitor / discard, graduation fit, geography, preparation cost and a
    one-line reason. Code does what code can: seniority words discard an opening with no call, and the business
    rules are checked on the answer (an opening outside the geography can never be "apply"; a violation is sent
    back once with the complaint). Verdicts are stored by opening, so re-running costs nothing.
-3. **Automated evals** (`src/agent_evals/run_evals.py`): the skill's request cases run on their own, with the
+3. **Automated evals** (`personal_ai_agents/agent_evals/run_evals.py`): the skill's request cases run on their own, with the
    model as judge (details below).
 
 ## Guardrails
@@ -39,19 +39,19 @@ Three automated pieces in this repository:
 - Tasks go through the Secretary's validation gate, after the human's ok.
 
 ## Tests and evals
-- **Request cases** (`evals/career_cases.json`, 12 fictitious cases mirroring the production golden set): each has
+- **Request cases** (`tests/golden/career_cases.json`, 12 fictitious cases mirroring the production golden set): each has
   a request, a context, the accepted modes and the expected behaviours. The agent model answers from the skill
-  (`evals/career_skill.md`) in a fixed JSON shape; code checks the mode; a separate judge call grades each
+  (`personal_ai_agents/agent_evals/career_skill.md`) in a fixed JSON shape; code checks the mode; a separate judge call grades each
   behaviour without seeing the skill. Two **negative controls** (wrong answers) must be failed by the judge, or
   the run is invalid. Binary per case, as in production.
-- **Scoreboard** (`evals/scoreboard.csv`): first live run 7/12; the failures pointed to three rules the skill
+- **Scoreboard** (`output/evals/scoreboard.csv`): first live run 7/12; the failures pointed to three rules the skill
   stated too vaguely and two case items worded ambiguously; after the fix, 11/12. The remaining failure (K11:
   the agent refuses to read the network in a routine but does not say the routine stays on public sources) is
   kept visible. CI replays the recorded answers and fails if the score drops below 11.
 - Unit tests without network: `tests/test_job_delta.py`, `tests/test_triage.py`, `tests/test_evals.py`.
 
 ## Example
-Real public boards, example candidate profile (`examples/triage_report.md`, first live run, 19 Oct 2026):
+Real public boards, example candidate profile (`output/triage_report.md`, first live run, 19 Oct 2026):
 ```
 New openings: 35 · decided by code: 16 · by the model: 19 · API calls: 20 · estimated cost: US$ 0.00328
 | monitor | BTG Pactual | Estágio Short Job / Automation - Development - São Paulo, Rio de Janeiro e Remoto | preferred | unknown | medium | Entry-level internship in a preferred city, but the title does not state accepted graduation dates ... |

@@ -10,9 +10,9 @@ from pathlib import Path
 from _path import EXAMPLES
 from fake_llm import make_llm
 
-from todoist_gate import planner
-from tracing import view
-from tracing.trace import Trace
+from personal_ai_agents.todoist_gate import planner
+from personal_ai_agents.tracing import view
+from personal_ai_agents.tracing.trace import Trace
 
 BOARD = json.loads(Path(EXAMPLES, "demo_board.json").read_text(encoding="utf-8"))
 DAY11 = [
@@ -84,7 +84,7 @@ class Tracing(unittest.TestCase):
         self.assertEqual(rows[1]["status"], "blocked")
         self.assertGreater(total["cost_usd"], 0)
         self.assertIn("model round=1", view.table(rows))
-        self.assertIn("<table>", view.page(rows, "x"))
+        self.assertIn("<table", view.page(rows, "x"))
 
     def test_error_is_recorded_and_raised(self):
         tr = Trace("t", None, root=tempfile.mkdtemp())
@@ -99,7 +99,7 @@ class Demo(unittest.TestCase):
 
         out = io.StringIO()
         with redirect_stdout(out):
-            code = demo.main(["--yes"])
+            code = demo.main(["secretary", "--yes", "--no-open"])
         text = out.getvalue()
         self.assertEqual(code, 0, text[-2000:])
         self.assertIn("BLOCKED (gate)", text)
@@ -119,12 +119,12 @@ class DemoWithoutKeyboard(unittest.TestCase):
         sys.stdin = io.StringIO("")  # a pipe: not a terminal, nothing to read
         try:
             with redirect_stdout(out):
-                code = demo.main([])
+                code = demo.main(["secretary", "--no-open"])
         finally:
             sys.stdin = stdin
         text = out.getvalue()
         self.assertEqual(code, 0)
-        self.assertIn("Not approved: nothing written", text)
+        self.assertIn("nothing written", text)
         self.assertNotIn("written to the fake board", text)
 
     def test_eof_at_the_prompt_is_not_approved(self):
@@ -139,7 +139,7 @@ class DemoWithoutKeyboard(unittest.TestCase):
         stdin = sys.stdin
         sys.stdin = Tty("")
         try:
-            self.assertFalse(demo.approve(False))
+            self.assertFalse(demo.approve_from([])())
         finally:
             sys.stdin = stdin
 

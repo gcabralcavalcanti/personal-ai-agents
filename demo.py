@@ -1,34 +1,38 @@
 #!/usr/bin/env python3
-"""One request on a fictitious task board: planner (Claude API) -> validator -> approval -> gate hook -> write.
+"""Run every agent on fictitious data and write its page to output/ (plus an index), then open the index.
 
-    python demo.py           # replays recorded model answers, no API key needed; asks before writing
-    python demo.py --yes     # approves the write without asking (scripts, CI)
-    python demo.py --live    # calls the API for answers not recorded yet
+    python demo.py                 # all agents; asks before the Secretary writes
+    python demo.py secretary       # one agent: secretary | habits | goals | career
+    python demo.py --yes           # approve the Secretary's write without asking (scripts, CI)
+    python demo.py --no-open       # do not open a browser
+    python demo.py --live          # call Claude for any answer not recorded yet (needs ANTHROPIC_API_KEY)
 
-Every stage is written to runs/<run>/trace.jsonl. Nothing touches a real Todoist account.
+No API key needed: the model's answers were recorded on a live run and replay. Nothing touches a real account.
 """
 
 from __future__ import annotations
 
 import json
-import os
-import subprocess
 import sys
-import tempfile
+import webbrowser
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-FLAGS = tempfile.mkdtemp(prefix="gate-flags-")
-os.environ["GATE_FLAGS_DIR"] = FLAGS  # before importing the gate modules
-sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
-from llm.client import LLM  # noqa: E402
-from todoist_gate import check_batch, planner  # noqa: E402
-from tracing.trace import Trace  # noqa: E402
-from tracing.view import table  # noqa: E402
+from personal_ai_agents import pages  # noqa: E402
+from personal_ai_agents.career import page as career_page  # noqa: E402
+from personal_ai_agents.career import triage  # noqa: E402
+from personal_ai_agents.goals import panel  # noqa: E402
+from personal_ai_agents.habits import dashboard, loop  # noqa: E402
+from personal_ai_agents.llm.client import LLM  # noqa: E402
+from personal_ai_agents.todoist_gate import page as secretary_page  # noqa: E402
+from personal_ai_agents.todoist_gate import run as secretary_run  # noqa: E402
+from personal_ai_agents.tracing.view import table  # noqa: E402
 
-HOOK = ROOT / "src" / "todoist_gate" / "gate_hook.py"
-MAX_ROUNDS = 3
+DATA, OUT = ROOT / "data", ROOT / "output"
+EXPORT_END = date(2026, 11, 15)  # last day in the fictitious habit-app export
 
 
 def say(title: str, body: str = "") -> None:
@@ -37,123 +41,100 @@ def say(title: str, body: str = "") -> None:
         print(body)
 
 
-def hook(call: dict) -> tuple[int, str]:
-    """Run the hook exactly as Claude Code does: tool call as JSON on stdin; exit 2 = blocked."""
-    p = subprocess.run(
-        [sys.executable, str(HOOK)],
-        input=json.dumps(call),
-        capture_output=True,
-        text=True,
-        env=dict(os.environ, GATE_FLAGS_DIR=FLAGS),
-    )
-    return p.returncode, p.stderr.strip()
+def quiet(title: str, body: str = "") -> None:
+    pass
 
 
-def approve(yes: bool) -> bool:
-    """--yes approves; otherwise ask, and treat no keyboard (pipe, CI, script) as "not approved"."""
-    if yes:
-        print("\n(--yes: approved)")
-        return True
-    if not sys.stdin.isatty():
-        print("\n(no interactive terminal: not approved)")
-        return False
-    try:
-        return input("\nApprove these writes? [y/N] ").strip().lower() == "y"
-    except EOFError:
-        return False
+def approve_from(argv: list[str]):
+    def approve() -> bool:
+        """--yes approves; otherwise ask, and treat no keyboard (pipe, CI, script) as "not approved"."""
+        if "--yes" in argv:
+            print("\n(--yes: approved)")
+            return True
+        if not sys.stdin.isatty():
+            print("\n(no interactive terminal: not approved)")
+            return False
+        try:
+            return input("\nApprove these writes? [y/N] ").strip().lower() == "y"
+        except EOFError:
+            return False
+
+    return approve
 
 
-def show_proposal(p: dict) -> str:
-    lines = [f'Planner: "{p["summary"]}"']
-    for d in sorted(p["days"], key=lambda d: d["date"]):
-        lines.append(f"  {d['date']}")
-        lines += [f"    {it['start']} {it['duration_min']:>3} min  {it['content']}" for it in d["items"]]
-    for r in p["reschedule_overdue"]:
-        lines.append(f"  overdue -> {r['date']}: {r['content']}")
-    return "\n".join(lines)
+def secretary(argv: list[str], verbose: bool) -> str:
+    board = json.loads((DATA / "demo_board.json").read_text(encoding="utf-8"))
+    llm = LLM(mode="auto" if "--live" in argv else "demo", max_calls=8)
+    r = secretary_run.run(board, llm, approve_from(argv), say if verbose else quiet)
+    (OUT / "secretary.html").write_text(secretary_page.page(r), encoding="utf-8")
+    if verbose:
+        say("Trace", table(r["trace"]))
+        t = r["total"]
+        print(f"\n{t['api_calls']} API call(s) now (US$ {t['cost_usd']:.5f}); {t['recorded_answers']} recorded "
+              f"answer(s) replayed (they cost US$ {t['recorded_cost_usd']:.5f} when recorded).")  # fmt: skip
+    if verbose or "--yes" in argv:
+        print(f"{r['written']} task(s) written" if r["written"] else "nothing written: not approved")
+    return f"a bad batch blocked by the gate; the plan closed in round {len(r['rounds'])}, then waits for approval"
+
+
+def habit_data():
+    export = DATA / "loop-habits-export.zip"
+    if not export.exists():
+        loop.write_fictitious_export(export, EXPORT_END)
+    habits, marks = loop.read_export(export)
+    return export, habits, marks
+
+
+def habits(argv: list[str], verbose: bool) -> str:
+    export, hab, marks = habit_data()
+    rows = dashboard.summary(hab, marks, EXPORT_END)
+    dashboard.write_spreadsheet(OUT / "habits.xlsx", hab, marks, rows, EXPORT_END)
+    page = dashboard.page(rows, marks, EXPORT_END, f"data/{export.name}", "output/habits.xlsx")
+    (OUT / "habits.html").write_text(page, encoding="utf-8")
+    green = sum(1 for r in rows if dashboard.light(r["r30"]) == "ok")
+    return f"{len(rows)} habits from the app export; {green} on target over the last 30 days"
+
+
+def goals(argv: list[str], verbose: bool) -> str:
+    _, _, marks = habit_data()
+    g = json.loads((DATA / "goals.json").read_text(encoding="utf-8"))
+    results = panel.evaluate(g, marks, EXPORT_END)
+    (OUT / "goals.html").write_text(panel.page(g, results, EXPORT_END), encoding="utf-8")
+    behind = sum(1 for o in results for k in o["krs"] if k["status"] != "ok")
+    return f"{len(results)} goals, {behind} key result(s) behind or off track"
+
+
+def career(argv: list[str], verbose: bool) -> str:
+    snap = json.loads((DATA / "job_board_snapshot.json").read_text(encoding="utf-8"))
+    profile = json.loads((DATA / "triage_profile.json").read_text(encoding="utf-8"))
+    llm = LLM(mode="auto" if "--live" in argv else "demo", max_calls=25)
+    store: dict = {}
+    counts = triage.triage(snap["state"], store, profile, llm, snap["date"], llm.max_calls)
+    page = career_page.page(store, counts, {"api_calls": llm.calls}, profile, snap["date"])
+    (OUT / "career.html").write_text(page, encoding="utf-8")
+    by = {d: sum(1 for r in store.values() if r.get("decision") == d) for d in ("apply", "monitor", "discard")}
+    return f"{counts['new']} openings: {by['apply']} apply, {by['monitor']} monitor, {by['discard']} discard"
+
+
+AGENTS = {"secretary": secretary, "habits": habits, "goals": goals, "career": career}
 
 
 def main(argv=None) -> int:
     argv = sys.argv[1:] if argv is None else argv
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    board = json.loads((ROOT / "examples" / "demo_board.json").read_text(encoding="utf-8"))
-    llm = LLM(mode="auto" if "--live" in argv else "demo", max_calls=8)
-    tr = Trace("demo", llm)
-
-    say(
-        "Request",
-        f'"{board["request"]}"\n(fictitious board: {board["today"]}, now {board["now"]}; '
-        f"model {llm.summary()['model']}, mode {llm.mode})",
-    )
-
-    with tr.step("hook: write before any batch") as s:
-        first_try = {
-            "tool_name": "mcp__todoist__reschedule-tasks",
-            "tool_input": {"tasks": [{"id": "t2", "dueString": "Mar 12 at 09:00"}]},
-        }
-        code, msg = hook(first_try)
-        s["status"], s["detail"] = ("blocked", msg[:120]) if code == 2 else ("ok", "passed")
-    say("1. The model tries to reschedule right away", f"hook exit {code}: {msg}")
-
-    feedback, scope, closed = "", "day", None
-    for rnd in range(1, MAX_ROUNDS + 1):
-        with tr.step("planner (Claude API)", round=rnd) as s:
-            proposal = planner.propose(llm, board, scope, feedback)
-            s["detail"] = f"scope={scope}; {len(proposal['days'])} day(s)"
-        say(
-            f"{rnd + 1}. Planner, round {rnd} "
-            f"(sees {'only the requested day' if scope == 'day' else 'the whole board'})",
-            show_proposal(proposal),
-        )
-        with tr.step("validator (check_batch)", round=rnd) as s:
-            res, text = planner.validate(board, proposal)
-            n = sum(len(d["errors"]) for d in res["days"]) + len(res["blockers"]) + len(res["decisions"])
-            s["status"], s["detail"] = ("ok", "batch closed") if res["ok"] else ("blocked", f"{n} problem(s)")
-        print("\nValidator:\n" + text)
-        if res["ok"]:
-            closed = proposal
-            break
-        feedback, scope = text, "full"
-    if closed is None:
-        say("Result", f"BATCH OPEN after {MAX_ROUNDS} rounds: nothing is written. The human decides.")
-        tr.close(outcome="open")
-        return 1
-
-    check_batch.FLAGS = FLAGS  # the run's own flag folder, never the repo's
-    check_batch.open_gate()
-    calls = planner.writes(board, closed)
-    with tr.step("human approval") as s:
-        say("Approval", "Tool calls to send:\n" + planner.dumps(calls))
-        ok = approve("--yes" in argv)
-        s["status"], s["detail"] = ("ok", "approved") if ok else ("blocked", "not approved")
-    if not ok:
-        print("Not approved: nothing written. Run `python demo.py --yes` to approve and see the write.")
-        tr.close(outcome="not approved")
-        return 0
-
-    with tr.step("hook: write with a closed batch") as s:
-        results = [hook(c) for c in calls]
-        pairs = zip(calls, results, strict=True)
-        s["detail"] = ", ".join(f"{c['tool_name'].split('__')[-1]}: exit {r[0]}" for c, r in pairs)
-        s["status"] = "ok" if all(r[0] == 0 for r in results) else "blocked"
-    say("The same hook, now with the batch closed", s["detail"])
-    if s["status"] != "ok":
-        tr.close(outcome="blocked")
-        return 1
-
-    with tr.step("write (fake Todoist)") as s:
-        n = sum(len(c["tool_input"]["tasks"]) for c, r in zip(calls, results, strict=False) if r[0] == 0)
-        s["detail"] = f"{n} task(s) written"
-    print(f"{n} task(s) written to the fake board.")
-
-    total = tr.close(outcome="written")
-    say("Trace", table([json.loads(line) for line in tr.path.read_text(encoding="utf-8").splitlines()]))
-    print(
-        f"\n{total['api_calls']} API call(s) now (US$ {total['cost_usd']:.5f}); {total['recorded_answers']} recorded "
-        f"answer(s) replayed (they cost US$ {total['recorded_cost_usd']:.5f} when recorded).\n"
-        f"Trace: runs/{tr.run_id}/trace.jsonl - HTML view: python src/tracing/view.py --last --html trace.html"
-    )
+    OUT.mkdir(exist_ok=True)
+    chosen = [a for a in argv if a in AGENTS] or list(AGENTS)
+    status = {}
+    for name in chosen:
+        status[name] = AGENTS[name](argv, verbose=len(chosen) == 1)
+        print(f"{name:<10} {status[name]}  ->  output/{name}.html")
+    if len(chosen) == len(AGENTS):
+        (OUT / "index.html").write_text(pages.index(status), encoding="utf-8")
+    target = OUT / ("index.html" if len(chosen) > 1 else f"{chosen[0]}.html")
+    print(f"\nOpen {target.relative_to(ROOT)}")
+    if "--no-open" not in argv:
+        webbrowser.open(target.as_uri())
     return 0
 
 

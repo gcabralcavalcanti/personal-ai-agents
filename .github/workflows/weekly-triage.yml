@@ -33,13 +33,13 @@ jobs:
           restore-keys: triage-state-
       - name: Job-board delta (public pages only)
         if: env.HAS_KEY == 'true'
-        run: python src/career/job_delta.py config/sources.csv data/weekly
+        run: python personal_ai_agents/career/job_delta.py data/sources.csv data/weekly
       - name: LLM triage of the new openings (capped)
         if: env.HAS_KEY == 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AGENTS_MAX_CALLS: "15"
-        run: python src/career/triage.py data/weekly --max 15
+        run: python personal_ai_agents/career/triage.py data/weekly --max 15
       - uses: actions/upload-artifact@v4
         if: env.HAS_KEY == 'true'
         with:

@@ -1,0 +1,62 @@
+{
+ "_comment": "Public job-board titles as read by career/job_delta.py on 2026-10-19 (Greenhouse public API). Used by the demo so the triage replays without network.",
+ "date": "2026-10-19",
+ "state": {
+  "https://boards.greenhouse.io/btgpactual": {
+   "area": "Finance",
+   "company": "BTG Pactual",
+   "hash": "e31480ad26d0644243325344dd211e2da0ce147f",
+   "items": [
+    "Analista Junior de Marketing | Branding - São Paulo",
+    "Analista de Auditoria Interna - São Paulo",
+    "Analista de Controles Internos | Gestão e Mapeamento de Processos (AN) - São Paulo",
+    "Analista de Controles Internos | Tecnologia (AN) - São Paulo",
+    "Analista de Operações Jr | Middle International - São Paulo",
+    "Analista de Risco Operacional e Controles Internos | Offshore Europa - São Paulo",
+    "Associate Director - Treinamento em Hard Skills | Mercado Financeiro - São Paulo",
+    "Desenvolvedor(a) Backend Junior/Pleno | Renda Fixa - São Paulo, Brazil",
+    "Engenheiro de Software Junior ou Pleno (Java) | Investment Products - São Paulo, São Paulo, Brazil",
+    "Engenheiro(a) de Software Backend (Python) Sênior – Plataforma Risco Operacional e Controles Internos - São Paulo",
+    "Engenheiro(a) de Software Junior(Full stack) | IT Accounting Clients & Finance Report - São Paulo ou Rio de Janeiro",
+    "Estágio Short Job (4 meses) | Risco Operacional - São Paulo",
+    "Estágio Short Job | Automation - Development - São Paulo, Rio de Janeiro e Remoto",
+    "Estágio Short Job | Automation - Discovery (Fev/2027) - São Paulo e Rio de Janeiro",
+    "Estágio Short Job | Automation - Discovery - São Paulo e Rio de Janeiro",
+    "Estágio em Capacitação e Treinamento - São Paulo",
+    "Estágio em Equity Research - São Paulo",
+    "Internalizações | IT Products - São Paulo, São Paulo, Brazil",
+    "Programa BTG Talentos | Estágio de Férias UNICAMP 2027.1 - São Paulo"
+   ]
+  },
+  "https://boards.greenhouse.io/stone": {
+   "area": "Fintech",
+   "company": "Stone",
+   "hash": "e7554b441f70e70c5c59f4c26514c29506ca84dc",
+   "items": [
+    "Analista Júnior  de Políticas de Crédito / Crédit Business Analyst - Sao Paulo, Sao Paulo, Brasil",
+    "Analista Pleno  de Políticas de Crédito / Crédit Business Analyst - Sao Paulo, Sao Paulo, Brasil",
+    "Analista de Auditoria Interna Sênior | Produtos Bancários e Contabilidade (Híbrido/SP) - Sao Paulo, Sao Paulo, Brasil",
+    "Business Analyst PLENO - Remoto",
+    "Especialista de TI | Controles Internos e Riscos Tecnológicos | (Híbrido/SP) - Sao Paulo, Sao Paulo, Brasil",
+    "Senior Business Analyst - Remoto",
+    "[Exclusiva PcD] Consultor(a) Comercial Interno | Híbrido - Rio de Janeiro/RJ - Híbrido, Rio de Janeiro"
+   ]
+  },
+  "https://boards.greenhouse.io/ebanx": {
+   "area": "Fintech",
+   "company": "EBANX",
+   "hash": "2cf85d343bf51154bc3ba015939178cba5a43dda",
+   "items": [
+    "Chargeback and Fraud Prevention Product Analyst - Curitiba or São Paulo | Hybrid",
+    "Payments & Partnership Operations Senior Analyst - Curitiba or São Paulo | On-site",
+    "Project Management Senior Analyst - Curitiba | On-site",
+    "Senior Analytics & Intelligence Analyst - Curitiba",
+    "Senior Chargeback & Fraud Analyst - Curitiba or São Paulo",
+    "Senior Commercial Legal Analyst - São Paulo",
+    "Senior Employer Branding & Internal Communications Analyst - Curitiba",
+    "Senior Product Analyst | Financial Products - Curitiba or São Paulo | Hybrid",
+    "Treasury Analyst | India - Mumbai"
+   ]
+  }
+ }
+}

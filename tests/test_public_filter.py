@@ -4,7 +4,7 @@ import unittest
 
 import _path  # noqa: F401
 
-from privacy import public_filter as pf
+from personal_ai_agents.privacy import public_filter as pf
 
 
 class PublicFilter(unittest.TestCase):
