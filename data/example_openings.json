@@ -1,0 +1,21 @@
+{
+  "_comment": "Fictitious openings added to the real job-board snapshot so the page shows every outcome (apply, monitor, discard). Company names say so.",
+  "state": {
+    "https://careers.acme-strategy.example/jobs": {
+      "area": "Consulting",
+      "company": "Acme Strategy (fictitious)",
+      "items": [
+        "Strategy Intern, for students graduating July-December 2027 - Rio de Janeiro",
+        "Business Analyst Intern, graduating December 2027 - Rio de Janeiro"
+      ]
+    },
+    "https://jobs.northwind.example/early-careers": {
+      "area": "Banking",
+      "company": "Northwind Bank (fictitious)",
+      "items": [
+        "Trainee Program 2027, for graduates of 2025 or 2026 - Sao Paulo",
+        "Data Analytics Intern, graduating in 2027 - Remote"
+      ]
+    }
+  }
+}

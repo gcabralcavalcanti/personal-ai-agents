@@ -106,6 +106,8 @@ def goals(argv: list[str], verbose: bool) -> str:
 
 def career(argv: list[str], verbose: bool) -> str:
     snap = json.loads((DATA / "job_board_snapshot.json").read_text(encoding="utf-8"))
+    examples = json.loads((DATA / "example_openings.json").read_text(encoding="utf-8"))
+    snap["state"].update(examples["state"])
     profile = json.loads((DATA / "triage_profile.json").read_text(encoding="utf-8"))
     llm = LLM(mode="auto" if "--live" in argv else "demo", max_calls=25)
     store: dict = {}

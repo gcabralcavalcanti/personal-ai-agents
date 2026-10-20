@@ -16,6 +16,7 @@ AGENTS = [
     ("career", "Career", "Reads public job boards and sorts new openings into apply, monitor or discard."),
 ]
 
+LIBRARIAN_URL = "https://github.com/gcabralcavalcanti/anki-librarian-mcp"
 CSS = (Path(__file__).with_name("pages.css")).read_text(encoding="utf-8")
 
 
@@ -40,6 +41,12 @@ def index(status: dict[str, str]) -> str:
         f"{esc(n)}</h2><p class='muted' style='margin:0'>{esc(d)}</p>"
         f"<p style='margin:8px 0 0'>{status.get(k, '')}</p></a>"
         for k, n, d in AGENTS
+    )
+    cards += (
+        f'<a class="panel" href="{LIBRARIAN_URL}" style="color:inherit;text-decoration:none">'
+        '<h2 style="margin:0 0 6px">Librarian (flashcards)</h2><p class="muted" style="margin:0">Turns study '
+        "material into Anki flashcards with the same safety rules.</p><p style='margin:8px 0 0'>Lives in its own "
+        "repository, anki-librarian-mcp, with a step-by-step simulation.</p></a>"
     )
     lead = (
         "Each agent here is a small, runnable version of one I use every day with my real data (Todoist, Anki, Loop "

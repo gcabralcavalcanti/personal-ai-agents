@@ -11,7 +11,7 @@ the safety rules that keep them from doing damage.
 | What happens | Where to see it |
 |---|---|
 | The calendar agent tries to change tasks before its plan was checked and is blocked; its first plan fails the checker and is sent back with the reasons; the second passes, and only then does the write go through | `python demo.py secretary` · [screenshot](docs/demo-secretary.png) |
-| 35 real openings from public job boards sorted for an example candidate: 16 settled by simple rules with no AI call, 19 read by Claude, for about US$ 0.003 | [`output/career.html`](output/career.html) · [`output/triage_report.md`](output/triage_report.md) |
+| 35 real openings from public job boards sorted for an example candidate: 16 settled by simple rules with no AI call, 19 read by Claude, for about US$ 0.003; four fictitious openings that state their graduation dates show all three outcomes (apply, monitor, discard) | [`output/career.html`](output/career.html) · [`output/triage_report.md`](output/triage_report.md) |
 | 11 of 12 test requests handled the way the career agent's rules say; the grader also rejects the two wrong answers planted to check it | [`output/evals/scoreboard.csv`](output/evals/scoreboard.csv) · [`output/evals/last-run.md`](output/evals/last-run.md) |
 | Goals scored from the data, next to how they feel: one goal feels like 4/10 and measures 8/10 | [`output/goals.html`](output/goals.html) |
 
@@ -59,7 +59,8 @@ Operations and troubleshooting: [`RUNBOOK.md`](RUNBOOK.md).
 - Calendar, habits and goals: **fictitious**, written for the demo ([`data/`](data/)). The habit export is
   generated in the same format the Loop Habits app writes.
 - Career: **real public job-board titles** from 19 Oct 2026
-  ([`data/job_board_snapshot.json`](data/job_board_snapshot.json)) and an example candidate profile.
+  ([`data/job_board_snapshot.json`](data/job_board_snapshot.json)), four fictitious openings marked as such
+  ([`data/example_openings.json`](data/example_openings.json)), and an example candidate profile.
 - Claude's answers for the demo are stored in [`data/recorded/`](data/recorded/) so every run can be replayed.
 - The private system this comes from (600+ commits) is not here. Some files are close copies, others simplified
   versions; each file says which.

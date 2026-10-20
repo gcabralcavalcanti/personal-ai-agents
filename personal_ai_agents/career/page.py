@@ -47,11 +47,13 @@ def page(store: dict, counts: dict, summary: dict, profile: dict, snapshot_date:
              f"<th>Company</th><th>Opening</th><th>Place</th><th>Why</th></tr>{trs}</table></div>")  # fmt: skip
     geo = profile["geography"]
     lead = (
-        f"New openings on public job boards (snapshot of {esc(snapshot_date)}), sorted for an example candidate: "
+        f"New openings on public job boards (snapshot of {esc(snapshot_date)}) plus four fictitious ones that state "
+        "their graduation dates (marked as such), sorted for an example candidate: "
         f"{esc(profile['candidate'])}; preferred city {esc(', '.join(geo['preferred']))}; also "
         f"{esc(', '.join(geo['acceptable']))}. Code discards senior and mid-level titles without calling the model; "
         "the model reads the rest and every answer is checked against the rules (an opening outside the geography "
-        "is never 'apply'). Running it again costs nothing: verdicts are stored by opening."
+        "is never 'apply'). Real titles rarely state graduation dates, so most of them land on 'monitor' until the "
+        "posting is read. Running it again costs nothing: verdicts are stored by opening."
     )
     return shell(
         "career",
@@ -59,5 +61,5 @@ def page(store: dict, counts: dict, summary: dict, profile: dict, snapshot_date:
         lead,
         f'<div class="grid g4">{tiles_html}</div><h2>Openings</h2>{table}{SCRIPT}',
         CSS,
-        data_note="Public job-board titles; example candidate profile.",
+        data_note="Public job-board titles plus four fictitious openings; example candidate profile.",
     )
