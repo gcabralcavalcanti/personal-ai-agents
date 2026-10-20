@@ -1,8 +1,36 @@
 # How it works
 
-The detail behind the README: what each demo shows, the agents and their rules, the data, the command-line
+The detail behind the README: how I use the agents, what each demo shows, the agents and their rules, the data, the command-line
 options, and how to run each agent on your own files. Operations and troubleshooting are in
 [`RUNBOOK.md`](../RUNBOOK.md).
+
+## How I use it
+
+- **Every day, on request:** the Secretary. I ask it to plan or replan the day, move a task or set up the week; every
+  change goes through the checker and my approval.
+- **Thursday night, scheduled:** a few tasks in Claude Desktop prepare the week. Habits rebuilds the dashboard from
+  the export I copy from my phone each week; Career scans the public job boards and leaves the new openings sorted
+  in a file; the Librarian prepares the flashcard radar menu; the Secretary lists what is pending for the weekend
+  review. None of them writes to the calendar or to Anki.
+- **Before morning:** the Optimizer reads what those tasks delivered and sends me a short summary.
+- **Thursday afternoon:** the Optimizer's weekly round goes through my notes, each agent's to-do list and how well
+  the week's routines actually happened.
+- **Less often:** goals at the turn of each quarter; study blocks when decks change or when I ask.
+
+The rule for all of them: they propose, I approve. A scheduled task prepares; nothing reaches live data without me.
+
+| Agent | Runs on its own | I ask for |
+|---|---|---|
+| Secretary | Thursday night: a list of what is pending for the weekend review (proposal only) | daily planning and replanning, moving and creating tasks, the weekly cleanup |
+| Habits | Thursday night: spreadsheet and dashboard from the latest export | the weekly export from the phone (my step), analyses |
+| Goals | nothing | the quarterly review, talks about a goal |
+| Career | Thursday night: job-board scan and sorting, to a file; every two weeks: what changed in the selection processes I follow | reading the results, CV and applications |
+| Study blocks | nothing | a new plan when decks change |
+| Librarian ([its own repository](https://github.com/gcabralcavalcanti/anki-librarian-mcp)) | Thursday night: radar menu, cards from quick questions, tag fixes every two weeks | picking from the menu, approving cards |
+| Optimizer | before Thursday morning: the night summary; Thursday afternoon: the weekly round | audits and fixes; every change with my ok |
+
+In my setup these are Claude Desktop scheduled tasks on my computer. In this repository, the one piece set to run
+by itself is the job triage, as a GitHub Actions workflow on Mondays (it does nothing without an API key).
 
 ## What each demo shows
 

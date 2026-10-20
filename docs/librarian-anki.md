@@ -19,7 +19,7 @@ Two layers.
 | Deck strategy | Given this quarter's goals, which decks are active, parked or new? | quarterly, with the goals review |
 | Pipeline and logistics | Which card skill runs now; how Anki, the task manager and the notes folder stay in sync; backups | on demand |
 | Scheduler health (FSRS) | Is the retention target right; is the daily load sustainable; what to prune | every 6 weeks |
-| Radars | Weekly scan of external sources per topic, turned into cards and tasks | weekly |
+| Radars | Weekly scan of external sources per topic; the main source of new cards. A Thursday-night scheduled task prepares the menu, I pick what becomes a card | weekly, scheduled; cards only with my approval |
 
 The live state of the collection (decks, presets, load, backlog) is a generated file, not prose: a script reads
 the collection and rewrites it, so the agent never reasons from a stale number.

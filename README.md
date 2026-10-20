@@ -26,10 +26,16 @@ python demo.py
 
 Runs without an API key, replaying recorded answers. Set `ANTHROPIC_API_KEY` and add `--live` to call Claude live.
 
+## How I use it
+
+The Secretary every day, when I ask. The others mostly prepare the week on Thursday night as scheduled tasks
+(habits dashboard, job openings, flashcard radar), and the Optimizer sends me a summary before morning. They
+propose; I approve. Who runs on its own and what I ask for: [How I use it](docs/how-it-works.md#how-i-use-it).
+
 ## More
 
-- [How it works](docs/how-it-works.md): each agent and its rules, the data, the options, and how to run every agent
-  on your own files (Loop Habits, Todoist, Anki).
+- [How it works](docs/how-it-works.md): how I use it, each agent and its rules, the data, the options, and how to
+  run every agent on your own files (Loop Habits, Todoist, Anki).
 - [Runbook](RUNBOOK.md): setup, routine commands, updating, and what to do when something breaks.
 - Everything here is fictitious or public; how personal data is kept out is in
   [How it works](docs/how-it-works.md#privacy--lgpd).
