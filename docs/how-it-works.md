@@ -16,6 +16,9 @@ options, and how to run each agent on your own files. Operations and troubleshoo
 - **Thursday afternoon:** the Optimizer's weekly round goes through my notes, each agent's to-do list and how well
   the week's routines actually happened.
 - **Less often:** goals at the turn of each quarter; study blocks when decks change or when I ask.
+- **The method:** every work or study block on the calendar is one of the four kinds of session in the README
+  (A.F.A.M.). The recurring upkeep of each agent, such as the weekly cleanup or the audit round, is a Maintenance
+  session: it keeps the agent running and adds nothing new.
 
 The rule for all of them: they propose, I approve. A scheduled task prepares; nothing reaches live data without me.
 

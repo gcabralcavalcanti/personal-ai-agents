@@ -21,7 +21,10 @@ with the safety rules that keep them from doing damage.
 
 **The method behind them.** I organise study and work in four kinds of session, A.F.A.M.: Architecting (build the
 material), Frameact (solve the problem), Anking (review in Anki) and Maintenance (keep a project running, no new
-features). The calendar and study agents plan the week around them; Maintenance is the newest and is being added now.
+features). The calendar and study agents plan the week around them. A Maintenance session does only the operational
+work that keeps a project going (the weekly calendar cleanup, the audit round, a check of the flashcard collection);
+a feature idea that comes up there becomes its own Architecting or Frameact task. On a given day, within one project,
+Maintenance comes last.
 
 ## Run it
 
