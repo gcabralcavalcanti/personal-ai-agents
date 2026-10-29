@@ -16,9 +16,9 @@ jobs:
       - name: Skip when the API key secret is not set
         if: env.HAS_KEY != 'true'
         run: echo "ANTHROPIC_API_KEY secret not set - nothing to do."
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: env.HAS_KEY == 'true'
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         if: env.HAS_KEY == 'true'
         with:
           python-version: "3.12"
@@ -26,7 +26,7 @@ jobs:
         run: pip install -r requirements.txt
       - name: Restore last week's delta state and verdicts
         if: env.HAS_KEY == 'true'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: data/weekly
           key: triage-state-${{ github.run_id }}
@@ -40,7 +40,7 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           AGENTS_MAX_CALLS: "15"
         run: python personal_ai_agents/career/triage.py data/weekly --max 15
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: env.HAS_KEY == 'true'
         with:
           name: triage-report
